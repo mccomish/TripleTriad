@@ -1,0 +1,383 @@
+/* ═══════════════════════════════════════════════════════════
+   Triple Triad – Stylesheet
+   ═══════════════════════════════════════════════════════════ */
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    min-height: 100vh;
+    background: linear-gradient(135deg, #0a0a1a 0%, #1a1a3e 50%, #0d0d2b 100%);
+    font-family: 'Inter', sans-serif;
+    color: #e0e0e0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    user-select: none;
+}
+
+/* ─── Container ──────────────────────────────── */
+
+#game-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+    padding: 20px;
+}
+
+header h1 {
+    font-family: 'Cinzel', serif;
+    font-size: 2.4rem;
+    background: linear-gradient(to bottom, #ffd700, #ff9500);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    letter-spacing: 4px;
+}
+
+/* ─── Turn Indicator ─────────────────────────── */
+
+#turn-indicator {
+    text-align: center;
+    font-size: 1rem;
+    font-weight: 600;
+    padding: 4px 18px;
+    margin-bottom: 8px;
+    border-radius: 4px;
+    transition: color 0.3s ease;
+    min-height: 28px;
+}
+
+#turn-indicator.player-turn { color: #64b5f6; }
+#turn-indicator.ai-turn     { color: #ef5350; }
+#turn-indicator.game-over   { color: #ffd700; font-size: 1.2rem; }
+
+/* ─── Play Area ──────────────────────────────── */
+
+#play-area {
+    display: flex;
+    align-items: flex-start;
+    gap: 28px;
+}
+
+.side {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    padding-top: 30px;
+}
+
+.side-label {
+    font-family: 'Cinzel', serif;
+    font-size: 0.85rem;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.5);
+}
+
+/* ─── Scores ─────────────────────────────────── */
+
+.score {
+    font-family: 'Cinzel', serif;
+    font-size: 1.8rem;
+    font-weight: 700;
+    width: 48px;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    border: 2px solid rgba(255, 255, 255, 0.15);
+    background: rgba(0, 0, 0, 0.4);
+}
+
+.score.blue {
+    color: #64b5f6;
+    border-color: rgba(100, 181, 246, 0.4);
+}
+
+.score.red {
+    color: #ef5350;
+    border-color: rgba(239, 83, 80, 0.4);
+}
+
+/* ─── Hands ──────────────────────────────────── */
+
+.hand {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+/* ─── Board ──────────────────────────────────── */
+
+#board {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    grid-template-rows: repeat(3, 1fr);
+    gap: 4px;
+    padding: 10px;
+    background: rgba(255, 255, 255, 0.04);
+    border: 2px solid rgba(255, 215, 0, 0.25);
+    border-radius: 8px;
+}
+
+.board-cell {
+    width: 110px;
+    height: 138px;
+    background: rgba(255, 255, 255, 0.025);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s ease, border-color 0.2s ease;
+}
+
+.board-cell.empty.available {
+    background: rgba(100, 181, 246, 0.08);
+    border-color: rgba(100, 181, 246, 0.25);
+    cursor: pointer;
+}
+
+.board-cell.empty.available:hover {
+    background: rgba(100, 181, 246, 0.18);
+    border-color: rgba(100, 181, 246, 0.5);
+}
+
+/* ─── Cards ──────────────────────────────────── */
+
+.card {
+    width: 100px;
+    height: 130px;
+    border-radius: 6px;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.3s ease;
+    overflow: hidden;
+}
+
+.card-player {
+    background: linear-gradient(145deg, #1a3a5c, #0d2240);
+    border: 2px solid #4a9eff;
+    box-shadow: 0 2px 8px rgba(74, 158, 255, 0.2);
+}
+
+.card-ai {
+    background: linear-gradient(145deg, #5c1a1a, #401010);
+    border: 2px solid #ff4a4a;
+    box-shadow: 0 2px 8px rgba(255, 74, 74, 0.2);
+}
+
+.card-facedown {
+    background: linear-gradient(145deg, #2a2a3a, #1a1a2a);
+    border: 2px solid #555;
+}
+
+.card-back {
+    font-size: 2.2rem;
+    color: #444;
+    font-weight: bold;
+}
+
+/* ─── Card Values (diamond layout) ───────────── */
+
+.card-values {
+    display: grid;
+    grid-template-areas:
+        ". top ."
+        "left . right"
+        ". bottom .";
+    grid-template-columns: 1fr 1fr 1fr;
+    grid-template-rows: 1fr 1fr 1fr;
+    width: 68px;
+    height: 68px;
+    align-items: center;
+    justify-items: center;
+}
+
+.val {
+    font-family: 'Cinzel', serif;
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: #fff;
+    text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.9);
+}
+
+.val-top    { grid-area: top; }
+.val-right  { grid-area: right; }
+.val-bottom { grid-area: bottom; }
+.val-left   { grid-area: left; }
+
+.card-name {
+    font-size: 0.5rem;
+    text-align: center;
+    color: rgba(255, 255, 255, 0.7);
+    margin-top: 4px;
+    max-width: 92px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    letter-spacing: 0.5px;
+}
+
+.card-level {
+    position: absolute;
+    top: 3px;
+    left: 5px;
+    font-size: 0.55rem;
+    color: #ffd700;
+    font-weight: 700;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
+}
+
+/* ─── Hand Card Interactions ─────────────────── */
+
+.hand-card.selectable {
+    cursor: pointer;
+}
+
+.hand-card.selectable:hover {
+    transform: scale(1.06);
+    z-index: 1;
+}
+
+/* Player selected card slides toward the board */
+#player-side .hand-card.selected {
+    transform: scale(1.08) translateX(-12px);
+    box-shadow: 0 0 18px rgba(255, 215, 0, 0.5);
+    border-color: #ffd700 !important;
+    z-index: 2;
+}
+
+/* ─── Animations ─────────────────────────────── */
+
+.card.flipping {
+    animation: flipCapture 0.45s ease-in-out;
+}
+
+@keyframes flipCapture {
+    0%   { transform: scaleX(1); }
+    50%  { transform: scaleX(0); }
+    100% { transform: scaleX(1); }
+}
+
+.card.placing {
+    animation: cardPlace 0.25s ease-out;
+}
+
+@keyframes cardPlace {
+    0%   { transform: scale(1.25); opacity: 0.6; }
+    100% { transform: scale(1); opacity: 1; }
+}
+
+/* ─── Game Over Overlay ──────────────────────── */
+
+#game-over-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.7);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 100;
+    backdrop-filter: blur(4px);
+}
+
+#game-over-overlay.hidden {
+    display: none;
+}
+
+#game-over-box {
+    background: linear-gradient(145deg, #1a1a3e, #0d0d2b);
+    border: 2px solid rgba(255, 215, 0, 0.5);
+    border-radius: 12px;
+    padding: 40px 60px;
+    text-align: center;
+}
+
+#game-over-text {
+    font-family: 'Cinzel', serif;
+    font-size: 2.5rem;
+    margin-bottom: 24px;
+    letter-spacing: 2px;
+}
+
+#game-over-text.win  { color: #ffd700; }
+#game-over-text.lose { color: #ef5350; }
+#game-over-text.draw { color: #b0bec5; }
+
+#play-again-btn {
+    font-family: 'Cinzel', serif;
+    font-size: 1rem;
+    padding: 10px 32px;
+    background: linear-gradient(145deg, #2a2a5e, #1a1a3e);
+    color: #ffd700;
+    border: 2px solid rgba(255, 215, 0, 0.5);
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    letter-spacing: 1px;
+}
+
+#play-again-btn:hover {
+    background: linear-gradient(145deg, #3a3a7e, #2a2a5e);
+    box-shadow: 0 0 15px rgba(255, 215, 0, 0.3);
+    transform: scale(1.05);
+}
+
+/* ─── Responsive ─────────────────────────────── */
+
+@media (max-width: 760px) {
+    #play-area {
+        flex-direction: column;
+        align-items: center;
+        gap: 16px;
+    }
+
+    .side {
+        flex-direction: row;
+        padding-top: 0;
+        gap: 10px;
+    }
+
+    .hand {
+        flex-direction: row;
+        gap: 4px;
+    }
+
+    .board-cell {
+        width: 85px;
+        height: 108px;
+    }
+
+    .card {
+        width: 78px;
+        height: 102px;
+    }
+
+    .card-values {
+        width: 54px;
+        height: 54px;
+    }
+
+    .val { font-size: 0.85rem; }
+    .card-name { font-size: 0.42rem; }
+
+    header h1 { font-size: 1.6rem; }
+
+    #player-side .hand-card.selected {
+        transform: scale(1.08) translateY(-10px);
+    }
+}

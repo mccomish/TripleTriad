@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Triple Triad Online</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Inter:wght@400;600&display=swap" rel="stylesheet">
+</head>
+<body>
+
+<!-- ════════════ AUTH SCREEN ════════════ -->
+<div id="screen-auth" class="screen active">
+    <div class="auth-box">
+        <h1 class="logo">TRIPLE TRIAD</h1>
+        <p class="subtitle">Online</p>
+
+        <div id="auth-form">
+            <input id="auth-user" type="text" placeholder="Username" maxlength="20" autocomplete="username">
+            <input id="auth-pass" type="password" placeholder="Password" autocomplete="current-password">
+            <div class="auth-buttons">
+                <button id="btn-login" class="btn gold">Login</button>
+                <button id="btn-register" class="btn outline">Register</button>
+            </div>
+            <p id="auth-error" class="error-text"></p>
+        </div>
+    </div>
+</div>
+
+<!-- ════════════ LOBBY SCREEN ════════════ -->
+<div id="screen-lobby" class="screen">
+    <header class="top-bar">
+        <h1 class="logo-sm">TRIPLE TRIAD</h1>
+        <div class="user-info">
+            <span id="lobby-username"></span>
+            <span id="lobby-stats" class="stats-badge"></span>
+            <span id="lobby-coins" class="coin-badge">🪙 0</span>
+            <button id="btn-logout" class="btn sm outline">Logout</button>
+        </div>
+    </header>
+
+    <div class="lobby-layout">
+        <!-- Left: Actions -->
+        <div class="lobby-actions">
+            <button id="btn-find-match" class="btn gold big">Find Match</button>
+            <button id="btn-cancel-find" class="btn outline big hidden">Cancel Search</button>
+            <p id="queue-msg" class="queue-msg hidden">Searching for opponent…</p>
+            <button id="btn-play-ai" class="btn gold big">Play vs AI</button>
+            <button id="btn-collection" class="btn outline big">My Collection</button>
+            <button id="btn-shop" class="btn outline big">Shop</button>
+        </div>
+
+        <!-- Right: Online Players -->
+        <div class="lobby-players">
+            <h3>Players Online</h3>
+            <ul id="player-list"></ul>
+        </div>
+    </div>
+</div>
+
+<!-- ════════════ COLLECTION SCREEN ════════════ -->
+<div id="screen-collection" class="screen">
+    <header class="top-bar">
+        <button id="btn-back-lobby" class="btn sm outline">&larr; Back</button>
+        <h2>My Collection</h2>
+        <div style="display:flex;gap:10px;align-items:center">
+            <span id="coll-count" class="stats-badge"></span>
+            <span id="coll-coins" class="coin-badge">🪙 0</span>
+        </div>
+    </header>
+    <div class="collection-toolbar">
+        <span class="sort-label">Sort by:</span>
+        <button class="sort-btn active" data-sort="level-desc">Strongest</button>
+        <button class="sort-btn" data-sort="level-asc">Weakest</button>
+        <button class="sort-btn" data-sort="rarity">Rarity</button>
+        <button class="sort-btn" data-sort="name">Name</button>
+        <button class="sort-btn" data-sort="dupes">Duplicates</button>
+    </div>
+    <div id="collection-grid" class="card-grid"></div>
+</div>
+
+<!-- ════════════ SHOP SCREEN ════════════ -->
+<div id="screen-shop" class="screen">
+    <header class="top-bar">
+        <button id="btn-shop-back" class="btn sm outline">&larr; Back</button>
+        <h2>Card Shop</h2>
+        <span id="shop-coins" class="coin-badge">🪙 0</span>
+    </header>
+    <div class="shop-layout">
+        <div id="pack-list" class="pack-grid"></div>
+    </div>
+</div>
+
+<!-- ════════════ PACK RESULT SCREEN ════════════ -->
+<div id="screen-pack-result" class="screen">
+    <div class="pack-result-box">
+        <h2>Pack Opened!</h2>
+        <div id="pack-cards" class="card-grid"></div>
+        <p id="pack-coins-left" class="coin-badge">🪙 0</p>
+        <button id="btn-pack-done" class="btn gold">OK</button>
+    </div>
+</div>
+
+<!-- ════════════ DECK SELECT SCREEN ════════════ -->
+<div id="screen-deck" class="screen">
+    <header class="top-bar">
+        <button id="btn-forfeit-deck" class="btn sm outline">&larr; Forfeit</button>
+        <h2>Choose 5 Cards</h2>
+        <span id="deck-opponent" class="stats-badge"></span>
+    </header>
+    <p class="deck-hint">Click cards to select your deck. <span id="deck-count">0</span>/5 selected</p>
+    <div id="deck-grid" class="card-grid"></div>
+    <button id="btn-confirm-deck" class="btn gold big" disabled>Confirm Deck</button>
+    <p id="deck-waiting" class="queue-msg hidden">Waiting for opponent…</p>
+</div>
+
+<!-- ════════════ GAME SCREEN ════════════ -->
+<div id="screen-game" class="screen">
+    <button id="btn-forfeit-game" class="btn sm outline forfeit-btn">&larr; Forfeit</button>
+    <div id="game-container">
+        <div id="play-area">
+            <!-- Opponent -->
+            <div id="opponent-side" class="side">
+                <div class="side-label" id="opp-name">Opponent</div>
+                <div id="opponent-score" class="score red">5</div>
+                <div id="opponent-hand" class="hand"></div>
+            </div>
+
+            <!-- Board -->
+            <div id="center">
+                <div id="turn-indicator">Your Turn</div>
+                <div id="board"></div>
+            </div>
+
+            <!-- Player -->
+            <div id="player-side" class="side">
+                <div class="side-label" id="my-name">You</div>
+                <div id="player-score" class="score blue">5</div>
+                <div id="player-hand" class="hand"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ════════════ CLAIM SCREEN ════════════ -->
+<div id="screen-claim" class="screen">
+    <div class="claim-box">
+        <h2 id="claim-title">You Win!</h2>
+        <p id="claim-subtitle">Pick a card from your opponent</p>
+        <div id="claim-cards" class="card-grid"></div>
+    </div>
+</div>
+
+<!-- ════════════ RESULT OVERLAY ════════════ -->
+<div id="screen-result" class="screen">
+    <div class="result-box">
+        <h2 id="result-text"></h2>
+        <p id="result-card-msg"></p>
+        <button id="btn-back-to-lobby" class="btn gold">Back to Lobby</button>
+    </div>
+</div>
+
+<!-- Socket.io served automatically by the server -->
+<script src="/socket.io/socket.io.js"></script>
+<script src="js/cards.js"></script>
+<script src="js/net.js"></script>
+<script src="js/ui.js"></script>
+<script src="js/main.js"></script>
+</body>
+</html>

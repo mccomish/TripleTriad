@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Triple Triad</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Inter:wght@400;600&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div id="game-container">
+        <header>
+            <h1>TRIPLE TRIAD</h1>
+        </header>
+
+        <div id="play-area">
+            <!-- Left: Opponent -->
+            <div id="opponent-side" class="side">
+                <div class="side-label">Opponent</div>
+                <div id="opponent-score" class="score red">5</div>
+                <div id="opponent-hand" class="hand"></div>
+            </div>
+
+            <!-- Center: Board -->
+            <div id="center">
+                <div id="turn-indicator">Your Turn</div>
+                <div id="board"></div>
+            </div>
+
+            <!-- Right: Player -->
+            <div id="player-side" class="side">
+                <div class="side-label">You</div>
+                <div id="player-score" class="score blue">5</div>
+                <div id="player-hand" class="hand"></div>
+            </div>
+        </div>
+
+        <div id="game-over-overlay" class="hidden">
+            <div id="game-over-box">
+                <h2 id="game-over-text"></h2>
+                <button id="play-again-btn">Play Again</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/cards.js"></script>
+    <script src="js/game.js"></script>
+    <script src="js/ai.js"></script>
+    <script src="js/ui.js"></script>
+    <script src="js/main.js"></script>
+</body>
+</html>
