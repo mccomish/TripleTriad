@@ -1,187 +1,146 @@
 /* ═══════════════════════════════════════════════════════════
-   Database – SQLite via sql.js (pure JS, no native deps)
+   Database – PostgreSQL via pg
    Users, card collections, match history
    ═══════════════════════════════════════════════════════════ */
 
-const initSqlJs = require('sql.js');
-const fs = require('fs');
-const path = require('path');
+const { Pool } = require('pg');
 
-const DB_PATH = path.join(__dirname, 'tripletriad.db');
-let db;
-
-/* ── Persist helper ──────────────────────────── */
-
-function save() {
-    const data = db.export();
-    fs.writeFileSync(DB_PATH, Buffer.from(data));
-}
+const pool = new Pool({
+    connectionString: process.env.DATABASE_URL,
+    ssl: process.env.DATABASE_URL ? { rejectUnauthorized: false } : false,
+});
 
 /* ── Initialise schema ───────────────────────── */
 
 async function init() {
-    const SQL = await initSqlJs();
-
-    if (fs.existsSync(DB_PATH)) {
-        const buf = fs.readFileSync(DB_PATH);
-        db = new SQL.Database(buf);
-    } else {
-        db = new SQL.Database();
-    }
-
-    db.run(`
+    await pool.query(`
         CREATE TABLE IF NOT EXISTS users (
-            id            INTEGER PRIMARY KEY AUTOINCREMENT,
-            username      TEXT    UNIQUE NOT NULL COLLATE NOCASE,
-            password_hash TEXT    NOT NULL,
+            id            SERIAL PRIMARY KEY,
+            username      TEXT   UNIQUE NOT NULL,
+            password_hash TEXT   NOT NULL,
             coins         INTEGER DEFAULT 500,
-            created_at    TEXT    DEFAULT (datetime('now'))
+            created_at    TIMESTAMPTZ DEFAULT NOW()
         )
     `);
-
-    // Migrate: add coins column if table already existed without it
-    try { db.run('ALTER TABLE users ADD COLUMN coins INTEGER DEFAULT 500'); } catch (_) {}
-    db.run(`
+    await pool.query(`
         CREATE TABLE IF NOT EXISTS collections (
-            id      INTEGER PRIMARY KEY AUTOINCREMENT,
-            user_id INTEGER NOT NULL,
-            card_id INTEGER NOT NULL,
-            FOREIGN KEY (user_id) REFERENCES users(id)
+            id      SERIAL PRIMARY KEY,
+            user_id INTEGER NOT NULL REFERENCES users(id),
+            card_id INTEGER NOT NULL
         )
     `);
-    db.run(`
+    await pool.query(`
         CREATE TABLE IF NOT EXISTS matches (
-            id          INTEGER PRIMARY KEY AUTOINCREMENT,
-            winner_id   INTEGER,
-            loser_id    INTEGER,
+            id          SERIAL PRIMARY KEY,
+            winner_id   INTEGER REFERENCES users(id),
+            loser_id    INTEGER REFERENCES users(id),
             is_draw     INTEGER DEFAULT 0,
             card_won_id INTEGER,
-            played_at   TEXT DEFAULT (datetime('now')),
-            FOREIGN KEY (winner_id) REFERENCES users(id),
-            FOREIGN KEY (loser_id)  REFERENCES users(id)
+            played_at   TIMESTAMPTZ DEFAULT NOW()
         )
     `);
-    db.run('CREATE INDEX IF NOT EXISTS idx_coll_user ON collections(user_id)');
-    db.run('CREATE INDEX IF NOT EXISTS idx_match_winner ON matches(winner_id)');
-    db.run('CREATE INDEX IF NOT EXISTS idx_match_loser  ON matches(loser_id)');
+    await pool.query('CREATE INDEX IF NOT EXISTS idx_coll_user ON collections(user_id)');
+    await pool.query('CREATE INDEX IF NOT EXISTS idx_match_winner ON matches(winner_id)');
+    await pool.query('CREATE INDEX IF NOT EXISTS idx_match_loser  ON matches(loser_id)');
 
-    save();
-}
-
-/* ── Helper: run a SELECT and return rows as objects ─── */
-
-function all(sql, params) {
-    const stmt = db.prepare(sql);
-    if (params) stmt.bind(params);
-    const rows = [];
-    while (stmt.step()) rows.push(stmt.getAsObject());
-    stmt.free();
-    return rows;
-}
-
-function get(sql, params) {
-    const rows = all(sql, params);
-    return rows.length ? rows[0] : null;
-}
-
-function run(sql, params) {
-    db.run(sql, params);
-    save();
+    // Migrate: add coins column if table already existed without it
+    try { await pool.query('ALTER TABLE users ADD COLUMN coins INTEGER DEFAULT 500'); } catch (_) {}
 }
 
 /* ── Users ───────────────────────────────────── */
 
-function getUserByUsername(username) {
-    return get('SELECT * FROM users WHERE username = ?', [username]);
+async function getUserByUsername(username) {
+    const { rows } = await pool.query('SELECT * FROM users WHERE LOWER(username) = LOWER($1)', [username]);
+    return rows[0] || null;
 }
 
-function createUser(username, passwordHash) {
-    db.run('INSERT INTO users (username, password_hash) VALUES (?, ?)', [username, passwordHash]);
-    const row = get('SELECT last_insert_rowid() AS id');
-    save();
-    return row.id;
+async function createUser(username, passwordHash) {
+    const { rows } = await pool.query(
+        'INSERT INTO users (username, password_hash) VALUES ($1, $2) RETURNING id',
+        [username, passwordHash]
+    );
+    return rows[0].id;
 }
 
 /* ── Collections ─────────────────────────────── */
 
-function grantStarterCollection(userId) {
-    // Give 15 unique cards (levels 1-4) so new players can build a 5-card deck easily
+async function grantStarterCollection(userId) {
     const base = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15];
-    const cards = base;
-    for (const cid of cards) {
-        db.run('INSERT INTO collections (user_id, card_id) VALUES (?, ?)', [userId, cid]);
-    }
-    save();
+    const values = base.map((cid, i) => `($1, $${i + 2})`).join(', ');
+    await pool.query(
+        `INSERT INTO collections (user_id, card_id) VALUES ${values}`,
+        [userId, ...base]
+    );
 }
 
-function getCollection(userId) {
-    return all(
-        'SELECT id AS instanceId, card_id AS cardId FROM collections WHERE user_id = ? ORDER BY card_id',
+async function getCollection(userId) {
+    const { rows } = await pool.query(
+        'SELECT id AS "instanceId", card_id AS "cardId" FROM collections WHERE user_id = $1 ORDER BY card_id',
         [userId]
     );
+    return rows;
 }
 
-function transferCard(fromUserId, toUserId, cardId) {
-    const row = get(
-        'SELECT id FROM collections WHERE user_id = ? AND card_id = ? LIMIT 1',
+async function transferCard(fromUserId, toUserId, cardId) {
+    const { rows } = await pool.query(
+        'SELECT id FROM collections WHERE user_id = $1 AND card_id = $2 LIMIT 1',
         [fromUserId, cardId]
     );
-    if (!row) return;
-    db.run('DELETE FROM collections WHERE id = ?', [row.id]);
-    db.run('INSERT INTO collections (user_id, card_id) VALUES (?, ?)', [toUserId, cardId]);
-    save();
+    if (!rows[0]) return;
+    await pool.query('DELETE FROM collections WHERE id = $1', [rows[0].id]);
+    await pool.query('INSERT INTO collections (user_id, card_id) VALUES ($1, $2)', [toUserId, cardId]);
 }
 
 /* ── Match history ───────────────────────────── */
 
-function recordMatch(winnerId, loserId, isDraw, cardWonId) {
-    run(
-        'INSERT INTO matches (winner_id, loser_id, is_draw, card_won_id) VALUES (?, ?, ?, ?)',
+async function recordMatch(winnerId, loserId, isDraw, cardWonId) {
+    await pool.query(
+        'INSERT INTO matches (winner_id, loser_id, is_draw, card_won_id) VALUES ($1, $2, $3, $4)',
         [winnerId, loserId, isDraw ? 1 : 0, cardWonId || null]
     );
 }
 
-function getStats(userId) {
-    const wins   = get('SELECT COUNT(*) AS c FROM matches WHERE winner_id = ? AND is_draw = 0', [userId]).c;
-    const losses = get('SELECT COUNT(*) AS c FROM matches WHERE loser_id  = ? AND is_draw = 0', [userId]).c;
-    const draws  = get(
-        'SELECT COUNT(*) AS c FROM matches WHERE (winner_id = ? OR loser_id = ?) AND is_draw = 1',
+async function getStats(userId) {
+    const wins = (await pool.query('SELECT COUNT(*) AS c FROM matches WHERE winner_id = $1 AND is_draw = 0', [userId])).rows[0].c;
+    const losses = (await pool.query('SELECT COUNT(*) AS c FROM matches WHERE loser_id = $1 AND is_draw = 0', [userId])).rows[0].c;
+    const draws = (await pool.query(
+        'SELECT COUNT(*) AS c FROM matches WHERE (winner_id = $1 OR loser_id = $2) AND is_draw = 1',
         [userId, userId]
-    ).c;
-    return { wins, losses, draws };
+    )).rows[0].c;
+    return { wins: Number(wins), losses: Number(losses), draws: Number(draws) };
 }
 
 /* ── Coins ───────────────────────────────────── */
 
-function getCoins(userId) {
-    const row = get('SELECT coins FROM users WHERE id = ?', [userId]);
-    return row ? row.coins : 0;
+async function getCoins(userId) {
+    const { rows } = await pool.query('SELECT coins FROM users WHERE id = $1', [userId]);
+    return rows[0] ? rows[0].coins : 0;
 }
 
-function addCoins(userId, amount) {
-    run('UPDATE users SET coins = coins + ? WHERE id = ?', [amount, userId]);
+async function addCoins(userId, amount) {
+    await pool.query('UPDATE users SET coins = coins + $1 WHERE id = $2', [amount, userId]);
 }
 
-function spendCoins(userId, amount) {
-    const row = get('SELECT coins FROM users WHERE id = ?', [userId]);
-    if (!row || row.coins < amount) return false;
-    run('UPDATE users SET coins = coins - ? WHERE id = ?', [amount, userId]);
+async function spendCoins(userId, amount) {
+    const { rows } = await pool.query('SELECT coins FROM users WHERE id = $1', [userId]);
+    if (!rows[0] || rows[0].coins < amount) return false;
+    await pool.query('UPDATE users SET coins = coins - $1 WHERE id = $2', [amount, userId]);
     return true;
 }
 
 /* ── Pack opening ────────────────────────────── */
 
-function addCardToCollection(userId, cardId) {
-    run('INSERT INTO collections (user_id, card_id) VALUES (?, ?)', [userId, cardId]);
+async function addCardToCollection(userId, cardId) {
+    await pool.query('INSERT INTO collections (user_id, card_id) VALUES ($1, $2)', [userId, cardId]);
 }
 
-function removeCardFromCollection(userId, cardId) {
-    const row = get(
-        'SELECT id FROM collections WHERE user_id = ? AND card_id = ? LIMIT 1',
+async function removeCardFromCollection(userId, cardId) {
+    const { rows } = await pool.query(
+        'SELECT id FROM collections WHERE user_id = $1 AND card_id = $2 LIMIT 1',
         [userId, cardId]
     );
-    if (!row) return false;
-    run('DELETE FROM collections WHERE id = ?', [row.id]);
+    if (!rows[0]) return false;
+    await pool.query('DELETE FROM collections WHERE id = $1', [rows[0].id]);
     return true;
 }
 

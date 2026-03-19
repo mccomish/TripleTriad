@@ -47,12 +47,12 @@ app.post('/api/register', async (req, res) => {
         return res.status(400).json({ error: 'Password must be at least 4 characters' });
 
     try {
-        if (db.getUserByUsername(username))
+        if (await db.getUserByUsername(username))
             return res.status(409).json({ error: 'Username already taken' });
 
         const hash   = await bcrypt.hash(password, 10);
-        const userId = db.createUser(username, hash);
-        db.grantStarterCollection(userId);
+        const userId = await db.createUser(username, hash);
+        await db.grantStarterCollection(userId);
 
         req.session.userId   = userId;
         req.session.username = username;
@@ -69,7 +69,7 @@ app.post('/api/login', async (req, res) => {
         return res.status(400).json({ error: 'Username and password required' });
 
     try {
-        const user = db.getUserByUsername(username);
+        const user = await db.getUserByUsername(username);
         if (!user) return res.status(401).json({ error: 'Invalid credentials' });
 
         const ok = await bcrypt.compare(password, user.password_hash);
@@ -89,11 +89,11 @@ app.post('/api/logout', (req, res) => {
     res.json({ ok: true });
 });
 
-app.get('/api/me', (req, res) => {
+app.get('/api/me', async (req, res) => {
     if (!req.session.userId) return res.status(401).json({ error: 'Not logged in' });
-    const collection = db.getCollection(req.session.userId);
-    const stats      = db.getStats(req.session.userId);
-    const coins      = db.getCoins(req.session.userId);
+    const collection = await db.getCollection(req.session.userId);
+    const stats      = await db.getStats(req.session.userId);
+    const coins      = await db.getCoins(req.session.userId);
     res.json({ username: req.session.username, collection, stats, coins });
 });
 
@@ -130,35 +130,35 @@ app.get('/api/packs', (req, res) => {
     res.json(PACKS.map(p => ({ id: p.id, name: p.name, cost: p.cost, count: p.count })));
 });
 
-app.post('/api/open-pack', (req, res) => {
+app.post('/api/open-pack', async (req, res) => {
     if (!req.session.userId) return res.status(401).json({ error: 'Not logged in' });
     const { packId } = req.body;
     const pack = PACKS.find(p => p.id === packId);
     if (!pack) return res.status(400).json({ error: 'Invalid pack' });
 
-    if (!db.spendCoins(req.session.userId, pack.cost))
+    if (!(await db.spendCoins(req.session.userId, pack.cost)))
         return res.status(400).json({ error: 'Not enough coins' });
 
     const cards = randomCardsFromPack(pack);
-    for (const c of cards) db.addCardToCollection(req.session.userId, c.id);
+    for (const c of cards) await db.addCardToCollection(req.session.userId, c.id);
 
-    const coins = db.getCoins(req.session.userId);
+    const coins = await db.getCoins(req.session.userId);
     res.json({ ok: true, cards, coins });
 });
 
-app.post('/api/sell-card', (req, res) => {
+app.post('/api/sell-card', async (req, res) => {
     if (!req.session.userId) return res.status(401).json({ error: 'Not logged in' });
     const { cardId } = req.body;
     if (typeof cardId !== 'number' || !CARD_MAP[cardId])
         return res.status(400).json({ error: 'Invalid card' });
 
-    if (!db.removeCardFromCollection(req.session.userId, cardId))
+    if (!(await db.removeCardFromCollection(req.session.userId, cardId)))
         return res.status(400).json({ error: "You don't own that card" });
 
     const price = getSellPrice(CARD_MAP[cardId].level);
-    db.addCoins(req.session.userId, price);
-    const coins = db.getCoins(req.session.userId);
-    const collection = db.getCollection(req.session.userId);
+    await db.addCoins(req.session.userId, price);
+    const coins = await db.getCoins(req.session.userId);
+    const collection = await db.getCollection(req.session.userId);
     res.json({ ok: true, price, coins, collection });
 });
 
@@ -209,14 +209,14 @@ io.on('connection', (socket) => {
 
     /* ── Matchmaking ─────────────────────────── */
 
-    socket.on('find-match', () => {
+    socket.on('find-match', async () => {
         if (playerToMatch.has(socket.id)) return;
         if (matchQueue.includes(socket.id)) return;
 
         if (matchQueue.length > 0) {
             const oppId = matchQueue.shift();
             if (!onlinePlayers.has(oppId)) return;   // stale
-            beginDeckSelect(socket.id, oppId);
+            await beginDeckSelect(socket.id, oppId);
         } else {
             matchQueue.push(socket.id);
             socket.emit('queue-status', { inQueue: true });
@@ -233,17 +233,17 @@ io.on('connection', (socket) => {
 
     /* ── AI Single Player ─────────────────── */
 
-    socket.on('play-ai', () => {
+    socket.on('play-ai', async () => {
         if (playerToMatch.has(socket.id)) return;
         if (aiMatches.has(socket.id)) return;
 
-        const collection = db.getCollection(userId);
+        const collection = await db.getCollection(userId);
         socket.emit('deck-select', { opponent: 'AI Opponent', collection });
         // Mark this player as pending AI match
         aiMatches.set(socket.id, { phase: 'deckSelect' });
     });
 
-    socket.on('select-deck-ai', (cardIds) => {
+    socket.on('select-deck-ai', async (cardIds) => {
         const aiState = aiMatches.get(socket.id);
         if (!aiState || aiState.phase !== 'deckSelect') return;
 
@@ -258,7 +258,7 @@ io.on('connection', (socket) => {
                 return;
             }
         }
-        const collection = db.getCollection(userId);
+        const collection = await db.getCollection(userId);
         const ownedIds = collection.map(r => r.cardId);
         const needed = {};
         for (const cid of cardIds) needed[cid] = (needed[cid] || 0) + 1;
@@ -303,7 +303,7 @@ io.on('connection', (socket) => {
 
     /* ── Deck selection ──────────────────────── */
 
-    socket.on('select-deck', (cardIds) => {
+    socket.on('select-deck', async (cardIds) => {
         const matchId = playerToMatch.get(socket.id);
         if (!matchId) return;
         const match = activeMatches.get(matchId);
@@ -321,7 +321,7 @@ io.on('connection', (socket) => {
             }
         }
 
-        const collection = db.getCollection(userId);
+        const collection = await db.getCollection(userId);
         const ownedIds   = collection.map(r => r.cardId);
 
         // Check ownership (handle duplicates)
@@ -346,7 +346,7 @@ io.on('connection', (socket) => {
 
     /* ── Gameplay ─────────────────────────────── */
 
-    socket.on('play-card', ({ handIndex, boardPos }) => {
+    socket.on('play-card', async ({ handIndex, boardPos }) => {
         const matchId = playerToMatch.get(socket.id);
         if (!matchId) return;
         const match = activeMatches.get(matchId);
@@ -368,16 +368,16 @@ io.on('connection', (socket) => {
             if (match.phase === 'cardClaim') {
                 const pResult = match.getResultFor(socket.id);
                 if (pResult === 'win') {
-                    db.addCoins(userId, COIN_AI_WIN);
+                    await db.addCoins(userId, COIN_AI_WIN);
                     const loserCards = match.getPlayerCards(aiState.aiSocket);
                     socket.emit('claim-phase', { opponentCards: loserCards });
                 } else {
-                    db.addCoins(userId, COIN_AI_LOSE);
-                    finaliseAiMatch(socket.id, null);
+                    await db.addCoins(userId, COIN_AI_LOSE);
+                    await finaliseAiMatch(socket.id, null);
                 }
             } else if (match.phase === 'done') {
-                db.addCoins(userId, COIN_AI_DRAW);
-                finaliseAiMatch(socket.id, null);
+                await db.addCoins(userId, COIN_AI_DRAW);
+                await finaliseAiMatch(socket.id, null);
             } else if (match.getCurrentTurnSocket() === aiState.aiSocket) {
                 setTimeout(() => aiMakeMove(socket.id), 800);
             }
@@ -391,14 +391,14 @@ io.on('connection', (socket) => {
                 io.to(winnerId).emit('claim-phase', { opponentCards: loserCards });
                 io.to(loserId).emit('waiting-claim', { message: "Opponent is choosing a card…" });
             } else if (match.phase === 'done') {
-                finaliseMatch(matchId, null);
+                await finaliseMatch(matchId, null);
             }
         }
     });
 
     /* ── Card claim ──────────────────────────── */
 
-    socket.on('claim-card', (cardId) => {
+    socket.on('claim-card', async (cardId) => {
         const matchId = playerToMatch.get(socket.id);
         if (!matchId) return;
         const match = activeMatches.get(matchId);
@@ -417,8 +417,8 @@ io.on('connection', (socket) => {
                 socket.emit('error-msg', 'Invalid card');
                 return;
             }
-            db.addCardToCollection(userId, cardId);
-            finaliseAiMatch(socket.id, cardId);
+            await db.addCardToCollection(userId, cardId);
+            await finaliseAiMatch(socket.id, cardId);
         } else {
             const loserSocket = match.getLoserSocketId();
             const loserCards  = match.getPlayerCards(loserSocket);
@@ -430,11 +430,11 @@ io.on('connection', (socket) => {
             const winnerInfo = onlinePlayers.get(socket.id);
             const loserInfo  = onlinePlayers.get(loserSocket);
             if (winnerInfo && loserInfo) {
-                db.transferCard(loserInfo.userId, winnerInfo.userId, cardId);
-                db.recordMatch(winnerInfo.userId, loserInfo.userId, false, cardId);
+                await db.transferCard(loserInfo.userId, winnerInfo.userId, cardId);
+                await db.recordMatch(winnerInfo.userId, loserInfo.userId, false, cardId);
             }
 
-            finaliseMatch(matchId, cardId);
+            await finaliseMatch(matchId, cardId);
         }
     });
 
@@ -506,7 +506,7 @@ io.on('connection', (socket) => {
    Helpers
    ═════════════════════════════════════════════════ */
 
-function beginDeckSelect(sA, sB) {
+async function beginDeckSelect(sA, sB) {
     const id    = 'match_' + (++matchCounter);
     const infoA = onlinePlayers.get(sA);
     const infoB = onlinePlayers.get(sB);
@@ -516,8 +516,8 @@ function beginDeckSelect(sA, sB) {
     playerToMatch.set(sA, id);
     playerToMatch.set(sB, id);
 
-    const collA = db.getCollection(infoA.userId);
-    const collB = db.getCollection(infoB.userId);
+    const collA = await db.getCollection(infoA.userId);
+    const collB = await db.getCollection(infoB.userId);
 
     io.to(sA).emit('deck-select', { opponent: infoB.username, collection: collA });
     io.to(sB).emit('deck-select', { opponent: infoA.username, collection: collB });
@@ -532,7 +532,7 @@ function emitGameState(matchId) {
     }
 }
 
-function finaliseMatch(matchId, claimedCardId) {
+async function finaliseMatch(matchId, claimedCardId) {
     const match = activeMatches.get(matchId);
     if (!match) return;
 
@@ -542,13 +542,13 @@ function finaliseMatch(matchId, claimedCardId) {
         const pA = onlinePlayers.get(sA);
         const pB = onlinePlayers.get(sB);
         if (pA && pB) {
-            db.recordMatch(pA.userId, pB.userId, true, null);
-            db.addCoins(pA.userId, COIN_DRAW);
-            db.addCoins(pB.userId, COIN_DRAW);
+            await db.recordMatch(pA.userId, pB.userId, true, null);
+            await db.addCoins(pA.userId, COIN_DRAW);
+            await db.addCoins(pB.userId, COIN_DRAW);
         }
         for (const sid of match.getPlayerSockets()) {
             const info = onlinePlayers.get(sid);
-            const coins = info ? db.getCoins(info.userId) : 0;
+            const coins = info ? await db.getCoins(info.userId) : 0;
             io.to(sid).emit('match-over', {
                 perspective:   match.getResultFor(sid),
                 claimedCardId,
@@ -563,12 +563,12 @@ function finaliseMatch(matchId, claimedCardId) {
         const loserSid  = match.getLoserSocketId();
         const wInfo = onlinePlayers.get(winnerSid);
         const lInfo = onlinePlayers.get(loserSid);
-        if (wInfo) db.addCoins(wInfo.userId, COIN_WIN);
-        if (lInfo) db.addCoins(lInfo.userId, COIN_LOSE);
+        if (wInfo) await db.addCoins(wInfo.userId, COIN_WIN);
+        if (lInfo) await db.addCoins(lInfo.userId, COIN_LOSE);
 
         for (const sid of match.getPlayerSockets()) {
             const info = onlinePlayers.get(sid);
-            const coins = info ? db.getCoins(info.userId) : 0;
+            const coins = info ? await db.getCoins(info.userId) : 0;
             const reward = (sid === winnerSid) ? COIN_WIN : COIN_LOSE;
             io.to(sid).emit('match-over', {
                 perspective:   match.getResultFor(sid),
@@ -585,7 +585,7 @@ function finaliseMatch(matchId, claimedCardId) {
 
 /* ── AI helpers ───────────────────────────────── */
 
-function aiMakeMove(playerSocketId) {
+async function aiMakeMove(playerSocketId) {
     const aiState = aiMatches.get(playerSocketId);
     if (!aiState || !aiState.matchId) return;
     const match = activeMatches.get(aiState.matchId);
@@ -624,26 +624,26 @@ function aiMakeMove(playerSocketId) {
     if (match.phase === 'cardClaim') {
         const pResult = match.getResultFor(playerSocketId);
         if (pResult === 'win') {
-            db.addCoins(aiState.userId || sock.request.session.userId, COIN_AI_WIN);
+            await db.addCoins(aiState.userId || sock.request.session.userId, COIN_AI_WIN);
             const loserCards = match.getPlayerCards(aiState.aiSocket);
             sock.emit('claim-phase', { opponentCards: loserCards });
         } else {
             // AI won
-            db.addCoins(sock.request.session.userId, COIN_AI_LOSE);
-            finaliseAiMatch(playerSocketId, null);
+            await db.addCoins(sock.request.session.userId, COIN_AI_LOSE);
+            await finaliseAiMatch(playerSocketId, null);
         }
     } else if (match.phase === 'done') {
-        db.addCoins(sock.request.session.userId, COIN_AI_DRAW);
-        finaliseAiMatch(playerSocketId, null);
+        await db.addCoins(sock.request.session.userId, COIN_AI_DRAW);
+        await finaliseAiMatch(playerSocketId, null);
     }
 }
 
-function finaliseAiMatch(playerSocketId, claimedCardId) {
+async function finaliseAiMatch(playerSocketId, claimedCardId) {
     const aiState = aiMatches.get(playerSocketId);
     if (!aiState) return;
     const match = activeMatches.get(aiState.matchId);
     const sock  = io.sockets.sockets.get(playerSocketId);
-    const coins = sock ? db.getCoins(sock.request.session.userId) : 0;
+    const coins = sock ? await db.getCoins(sock.request.session.userId) : 0;
     const perspective = match ? match.getResultFor(playerSocketId) : 'draw';
     var reward = COIN_AI_DRAW;
     if (perspective === 'win') reward = COIN_AI_WIN;
