@@ -265,6 +265,29 @@
     </div>
 </div>
 
+<!-- ════════════ CARD DETAIL MODAL ════════════ -->
+<div id="card-modal" class="modal-overlay hidden">
+    <div class="card-modal-box">
+        <button id="modal-close" class="modal-close">&times;</button>
+        <div class="modal-card-preview" id="modal-card-slot"></div>
+        <div class="modal-info">
+            <h2 id="modal-card-name"></h2>
+            <div class="modal-meta">
+                <span id="modal-card-level" class="modal-level"></span>
+                <span id="modal-card-rarity" class="modal-rarity"></span>
+            </div>
+            <div class="modal-stats">
+                <div class="modal-stat"><span class="stat-label">Top</span><span id="modal-val-top" class="stat-val"></span></div>
+                <div class="modal-stat"><span class="stat-label">Right</span><span id="modal-val-right" class="stat-val"></span></div>
+                <div class="modal-stat"><span class="stat-label">Bottom</span><span id="modal-val-bottom" class="stat-val"></span></div>
+                <div class="modal-stat"><span class="stat-label">Left</span><span id="modal-val-left" class="stat-val"></span></div>
+                <div class="modal-stat"><span class="stat-label">Total</span><span id="modal-val-total" class="stat-val stat-total"></span></div>
+            </div>
+            <p id="modal-card-lore" class="modal-lore"></p>
+        </div>
+    </div>
+</div>
+
 <!-- Socket.io served automatically by the server -->
 <script src="/socket.io/socket.io.js"></script>
 <script src="js/cards.js"></script>

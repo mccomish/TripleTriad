@@ -509,7 +509,7 @@ TT.UI = {
 
         for (var i = 0; i < listings.length; i++) {
             var l = listings[i];
-            var card = TT.Cards[l.card_id];
+            var card = TT.CARD_MAP[l.card_id];
             if (!card) continue;
 
             var wrapper = document.createElement('div');
@@ -553,7 +553,7 @@ TT.UI = {
 
         for (var i = 0; i < listings.length; i++) {
             var l = listings[i];
-            var card = TT.Cards[l.card_id];
+            var card = TT.CARD_MAP[l.card_id];
             if (!card) continue;
 
             var wrapper = document.createElement('div');
@@ -587,18 +587,18 @@ TT.UI = {
         // Build unique card list with counts
         var counts = {};
         for (var i = 0; i < collection.length; i++) {
-            var id = collection[i];
+            var id = collection[i].cardId || collection[i];
             counts[id] = (counts[id] || 0) + 1;
         }
 
         var sorted = Object.keys(counts).sort(function (a, b) {
-            var ca = TT.Cards[a], cb = TT.Cards[b];
+            var ca = TT.CARD_MAP[a], cb = TT.CARD_MAP[b];
             return (cb ? cb.level : 0) - (ca ? ca.level : 0);
         });
 
         for (var j = 0; j < sorted.length; j++) {
             var cardId = parseInt(sorted[j], 10);
-            var card = TT.Cards[cardId];
+            var card = TT.CARD_MAP[cardId];
             if (!card) continue;
 
             var el = this.buildCard(card, 'card-neutral');
@@ -624,5 +624,41 @@ TT.UI = {
         var div = document.createElement('div');
         div.appendChild(document.createTextNode(str));
         return div.innerHTML;
+    },
+
+    /* ── Card Detail Modal ──────────────────── */
+
+    showCardModal: function (cardId) {
+        var card = TT.CARD_MAP[cardId];
+        if (!card) return;
+
+        var modal = document.getElementById('card-modal');
+        var slot  = document.getElementById('modal-card-slot');
+        slot.innerHTML = '';
+        slot.appendChild(this.buildCard(card, 'card-neutral'));
+
+        document.getElementById('modal-card-name').textContent = card.name;
+        document.getElementById('modal-card-level').textContent = 'Level ' + card.level;
+
+        var rarity = TT.getRarity(card.level);
+        var rarityEl = document.getElementById('modal-card-rarity');
+        rarityEl.textContent = rarity.name;
+        rarityEl.className = 'modal-rarity rarity-badge ' + rarity.css;
+
+        document.getElementById('modal-val-top').textContent = TT.formatValue(card.values[0]);
+        document.getElementById('modal-val-right').textContent = TT.formatValue(card.values[1]);
+        document.getElementById('modal-val-bottom').textContent = TT.formatValue(card.values[2]);
+        document.getElementById('modal-val-left').textContent = TT.formatValue(card.values[3]);
+        var total = card.values[0] + card.values[1] + card.values[2] + card.values[3];
+        document.getElementById('modal-val-total').textContent = total;
+
+        var lore = (TT.CARD_LORE && TT.CARD_LORE[cardId]) || '';
+        document.getElementById('modal-card-lore').textContent = lore;
+
+        modal.classList.remove('hidden');
+    },
+
+    hideCardModal: function () {
+        document.getElementById('card-modal').classList.add('hidden');
     }
 };

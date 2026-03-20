@@ -71,3 +71,48 @@ TT.RARITIES = {
 TT.getRarity = function (level) {
     return TT.RARITIES[level] || TT.RARITIES[1];
 };
+
+/* ── Card Lore / Flavor Text ─────────────────── */
+
+TT.CARD_LORE = {
+    1:  "A shambling mass of moss and vine that lurks in damp caverns. Its roots drink from the stone itself.",
+    2:  "Lightning-quick insect with a barbed tail. Swarms of Stingers have been known to down creatures ten times their size.",
+    3:  "A bat-like predator that hunts at twilight. Its shriek can shatter glass at close range.",
+    4:  "An amorphous blob of acidic gel. Surprisingly resilient — cutting one only produces two.",
+    5:  "A delicate moth that rides desert thermals. Its wing-dust causes vivid hallucinations.",
+    6:  "A mischievous lesser demon fond of stealing shiny objects. Mostly harmless — mostly.",
+    7:  "A wraith born from a dying person's last regret. It passes through walls as easily as air.",
+    8:  "A fat, armored larva found in rotting wood. Alchemists prize its silk for potion filters.",
+    9:  "Its gaze turns flesh to calcium. Veterans know to fight it by watching its shadow instead.",
+    10: "A tree-shaped fiend that uproots itself to hunt. The sound of cracking wood precedes its attacks.",
+    11: "A tiny elemental spirit made of pure light. Playful but volatile — one sneeze can start a fire.",
+    12: "A rhinoceros-like beast with three spiraling horns. Charges first, thinks never.",
+    13: "A floating eyeball encased in ice. It watches everything and forgets nothing.",
+    14: "An empty suit of cursed plate armor. Whatever once wore it has long since rotted away.",
+    15: "A raptor that nests above the clouds. Its talons can pierce dragon scale.",
+    16: "Deceptively fast serpent with twin hinged fangs. One bite delivers enough venom to fell an ox.",
+    17: "A living shadow that detaches from its host at midnight. It feeds on fear.",
+    18: "A drake with stone-hard scales. Miners sometimes mistake a sleeping one for a boulder — once.",
+    19: "A translucent jellyfish that floats through ocean currents. Its tentacles trail for thirty feet.",
+    20: "An insectoid warrior that leads swarms with clicking mandible-code. Ruthlessly tactical.",
+    21: "A haunted breastplate that compels its wearer to seek battle. Many heroes have worn it. None retired.",
+    22: "A tortoise-like golem forged in a dwarven foundry. Its iron shell can withstand cannon fire.",
+    23: "A three-jawed predator from the deep trenches. Each mouth has its own primitive brain.",
+    24: "It waits beneath the dunes with infinite patience. Only a faint ripple in the sand betrays it.",
+    25: "A majestic lion with a mane of crystallized frost. Its roar brings blizzards.",
+    26: "An ancient tree awakened by wild magic. It remembers every season since the world was young.",
+    27: "A skeletal claw that rises from battlefields. Scholars debate whether it's undead or something worse.",
+    28: "A towering stone giant from the old world. Earthquakes mark its footsteps.",
+    29: "An eastern dragon cloaked in storm clouds. Legends say it guards the gate between worlds.",
+    30: "A blind serpent that navigates by heat. It coils around volcanic vents for centuries at a time.",
+    31: "Lion, goat, and serpent fused by forgotten sorcery. Each head argues with the others constantly.",
+    32: "A scarlet-scaled drake whose breath melts steel. Only three have ever been seen — and survived.",
+    33: "A massive beast of raw muscle and fury. Even apex predators give it a wide berth.",
+    34: "A hunter from the space between planes. It stalks prey across dimensions.",
+    35: "A benevolent giant that carries a lantern of living flame. Travelers follow its light to safety.",
+    36: "Two legendary commanders fused by a dying curse. They share one body but still bicker over strategy.",
+    37: "The storm given form. Lightning dances along its wingspan and thunder follows its every move.",
+    38: "A tyrant who traded his soul for dominion over darkness. His kingdom exists only in shadow.",
+    39: "A titan of living magma. Where it walks, the earth melts and new mountains are born.",
+    40: "An ancient sorceress who merged with the ocean. She commands tides and speaks in the crash of waves.",
+};
