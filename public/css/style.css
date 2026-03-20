@@ -662,6 +662,35 @@ body {
     .pack-card { width: 200px; padding: 24px; }
 }
 
+@media (max-width: 420px) {
+    .logo { font-size: 1.8rem; letter-spacing: 2px; }
+    .board-cell { width: 28vw; height: 35vw; }
+    .card { width: 26vw; height: 33vw; }
+    .card-values { width: 18vw; height: 18vw; }
+    .val { font-size: 0.7rem; }
+    .card-name { font-size: 0.38rem; }
+    .card-level { font-size: 0.5rem; padding: 1px 4px; }
+    .rarity-badge { font-size: 0.4rem; padding: 1px 4px; }
+    .hand { gap: 3px; }
+    .side { gap: 6px; }
+    .score { width: 36px; height: 36px; font-size: 1.3rem; }
+    .side-label { font-size: 0.7rem; }
+    #board { gap: 3px; padding: 6px; }
+    #turn-indicator { font-size: 0.8rem; }
+    .btn { padding: 8px 16px; font-size: 0.75rem; }
+    .btn.big { width: 150px; padding: 10px; }
+    .pack-grid { gap: 12px; }
+    .pack-card { width: 46vw; padding: 16px 10px; }
+    .card-grid .card { width: 70px; height: 90px; }
+    .card-grid .card .card-values { width: 48px; height: 48px; }
+    .deck-slots { gap: 4px; }
+    .deck-slots .card { width: 56px; height: 72px; }
+    .deck-slots .card .card-values { width: 40px; height: 40px; }
+    .auth-box { padding: 20px; }
+    .result-box { padding: 24px; }
+    .result-box h2 { font-size: 1.6rem; }
+}
+
 /* ═══════════════════════════════════════════════
    COIN BADGE
    ═══════════════════════════════════════════════ */

@@ -325,6 +325,11 @@ window.TT = window.TT || {};
 
     document.addEventListener('DOMContentLoaded', function () {
 
+        // Register service worker for PWA
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('/sw.js');
+        }
+
         wireSocketEvents();
 
         // Auth buttons
