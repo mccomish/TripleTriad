@@ -294,7 +294,7 @@ body {
 
 .rarity-badge {
     position: absolute;
-    top: 15px;
+    top: 18px;
     left: 5px;
     font-size: 0.35rem;
     font-weight: 700;
@@ -333,11 +333,11 @@ body {
 }
 .card-grid .card .card-level {
     font-size: 0.6rem;
-    top: 5px;
+    top: 6px;
 }
 .card-grid .card .rarity-badge {
     font-size: 0.4rem;
-    top: 18px;
+    top: 22px;
 }
 .card-grid .card .val {
     font-size: 1rem;
@@ -761,8 +761,8 @@ body {
 }
 .modal-card-preview .val { font-size: 1.15rem; }
 .modal-card-preview .card-name { font-size: 0.7rem; padding: 10px 6px 6px; }
-.modal-card-preview .card-level { font-size: 0.7rem; top: 6px; }
-.modal-card-preview .rarity-badge { font-size: 0.5rem; top: 22px; }
+.modal-card-preview .card-level { font-size: 0.7rem; top: 8px; }
+.modal-card-preview .rarity-badge { font-size: 0.5rem; top: 26px; }
 .modal-card-preview .card-image { opacity: 0.85; }
 
 .modal-info {
