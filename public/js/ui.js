@@ -453,8 +453,8 @@ TT.UI = {
         grid.innerHTML = '';
 
         var icons = { bronze: '🥉', silver: '🥈', gold: '🥇', legend: '💎' };
-        var levelInfo = { bronze: 'Lv 1–3', silver: 'Lv 2–5', gold: 'Lv 4–7', legend: 'Lv 7–10' };
-        var bonusInfo = { bronze: '1 bonus slot: better Lv 3 odds', silver: '1 bonus slot: better Lv 5 odds', gold: '1 bonus slot: better Lv 7 odds', legend: '1 bonus slot: better Lv 10 odds' };
+        var levelInfo = { bronze: 'Lv 1–3', silver: 'Lv 1–5', gold: 'Lv 1–7', legend: 'Lv 1–10' };
+        var bonusInfo = { bronze: 'Bonus: small Lv 3 chance', silver: 'Bonus: small Lv 5 chance', gold: 'Bonus: small Lv 7 chance', legend: 'Bonus: rare Lv 10 chance' };
 
         for (var i = 0; i < packs.length; i++) {
             var p = packs[i];

@@ -104,24 +104,20 @@ app.get('/api/me', async (req, res) => {
 const { CARDS: ALL_CARDS, CARD_MAP } = GameEngine;
 
 // Pack definitions: name, cost, 15 cards each, level range with rarity weights
-// Lower levels in the pool are more common; 1 bonus slot has a shot at top-tier
+// Lower levels are far more common; 1 bonus slot gives a small chance at top-tier
 const PACKS = [
     { id: 'bronze', name: 'Bronze Pack',  cost: 100, count: 15,
-      pool: [1,2,3],
-      weights: { 1: 60, 2: 30, 3: 10 },
-      bonusWeights: { 1: 30, 2: 40, 3: 30 } },
+      weights: { 1: 65, 2: 25, 3: 10 },
+      bonusWeights: { 1: 40, 2: 35, 3: 25 } },
     { id: 'silver', name: 'Silver Pack',  cost: 300, count: 15,
-      pool: [2,3,4,5],
-      weights: { 2: 50, 3: 30, 4: 15, 5: 5 },
-      bonusWeights: { 2: 10, 3: 25, 4: 35, 5: 30 } },
+      weights: { 1: 20, 2: 35, 3: 25, 4: 14, 5: 6 },
+      bonusWeights: { 2: 15, 3: 25, 4: 35, 5: 25 } },
     { id: 'gold',   name: 'Gold Pack',    cost: 600, count: 15,
-      pool: [4,5,6,7],
-      weights: { 4: 45, 5: 30, 6: 18, 7: 7 },
-      bonusWeights: { 4: 10, 5: 20, 6: 35, 7: 35 } },
+      weights: { 1: 8, 2: 12, 3: 20, 4: 25, 5: 18, 6: 12, 7: 5 },
+      bonusWeights: { 4: 15, 5: 30, 6: 35, 7: 20 } },
     { id: 'legend', name: 'Legend Pack',   cost: 1200, count: 15,
-      pool: [7,8,9,10],
-      weights: { 7: 45, 8: 30, 9: 18, 10: 7 },
-      bonusWeights: { 7: 10, 8: 20, 9: 35, 10: 35 } },
+      weights: { 1: 5, 2: 7, 3: 10, 4: 13, 5: 15, 6: 17, 7: 15, 8: 10, 9: 6, 10: 2 },
+      bonusWeights: { 6: 10, 7: 25, 8: 30, 9: 25, 10: 10 } },
 ];
 
 // Weighted random: pick a level from a weights map
