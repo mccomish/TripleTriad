@@ -12,6 +12,15 @@ TT.UI = {
     CARD_IMAGES: {
         1: 'moss.png',
         2: 'stinger.png',
+        3: 'duskwing.png',
+        4: 'slime.png',
+        5: 'windmoth.png',
+        6: 'imp.png',
+        7: 'shade.png',
+        8: 'grub.png',
+        9: 'basilisk.png',
+        10: 'rootfiend.png',
+        11: 'sprite.png',
     },
 
     /* ── Screen management ───────────────────── */
