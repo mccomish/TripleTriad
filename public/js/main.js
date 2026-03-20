@@ -540,6 +540,12 @@ window.TT = window.TT || {};
         document.getElementById('btn-play-ai').addEventListener('click', onPlayAI);
         document.getElementById('btn-shop').addEventListener('click', openShop);
         document.getElementById('btn-market').addEventListener('click', openMarket);
+        document.getElementById('btn-how-to-play').addEventListener('click', function () {
+            TT.UI.showScreen('screen-how-to-play');
+        });
+        document.getElementById('btn-htp-back').addEventListener('click', function () {
+            TT.UI.showScreen('screen-lobby');
+        });
 
         // Collection
         document.getElementById('btn-back-lobby').addEventListener('click', function () {

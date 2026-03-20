@@ -673,6 +673,86 @@ body {
 .result-box p { color: rgba(255,255,255,0.5); font-size: 0.9rem; }
 
 /* ═══════════════════════════════════════════════
+   HOW TO PLAY
+   ═══════════════════════════════════════════════ */
+
+#screen-how-to-play {
+    flex-direction: column;
+    align-items: center;
+}
+
+.htp-content {
+    max-width: 700px;
+    width: 100%;
+    padding: 24px 20px 40px;
+    overflow-y: auto;
+    flex: 1;
+}
+
+.htp-section {
+    margin-bottom: 28px;
+}
+
+.htp-section h3 {
+    font-family: 'Cinzel', serif;
+    color: #ffd700;
+    font-size: 1.1rem;
+    margin-bottom: 8px;
+    border-bottom: 1px solid rgba(255,215,0,0.2);
+    padding-bottom: 6px;
+}
+
+.htp-section p {
+    color: rgba(255,255,255,0.8);
+    line-height: 1.6;
+    font-size: 0.9rem;
+    margin-bottom: 8px;
+}
+
+.htp-section ul {
+    list-style: none;
+    padding: 0;
+}
+
+.htp-section li {
+    color: rgba(255,255,255,0.8);
+    font-size: 0.9rem;
+    line-height: 1.6;
+    padding-left: 20px;
+    position: relative;
+    margin-bottom: 6px;
+}
+
+.htp-section li::before {
+    content: '▸';
+    position: absolute;
+    left: 0;
+    color: #ffd700;
+}
+
+.htp-card-diagram {
+    position: relative;
+    width: 100px;
+    height: 100px;
+    margin: 16px auto;
+    border: 2px solid rgba(255,215,0,0.4);
+    border-radius: 8px;
+    background: rgba(255,255,255,0.05);
+}
+
+.htp-val {
+    position: absolute;
+    font-family: 'Cinzel', serif;
+    font-size: 0.6rem;
+    color: #ffd700;
+    text-align: center;
+}
+.htp-val.top    { top: 6px;  left: 50%; transform: translateX(-50%); }
+.htp-val.bottom { bottom: 6px; left: 50%; transform: translateX(-50%); }
+.htp-val.left   { left: 6px; top: 50%; transform: translateY(-50%); }
+.htp-val.right  { right: 6px; top: 50%; transform: translateY(-50%); }
+
+/* ═══════════════════════════════════════════════
    AUCTION HOUSE / MARKET
    ═══════════════════════════════════════════════ */
 
