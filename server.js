@@ -103,20 +103,51 @@ app.get('/api/me', async (req, res) => {
 
 const { CARDS: ALL_CARDS, CARD_MAP } = GameEngine;
 
-// Pack definitions: name, cost, card count, level range weights
+// Pack definitions: name, cost, 15 cards each, level range with rarity weights
+// Lower levels in the pool are more common; 1 bonus slot has a shot at top-tier
 const PACKS = [
-    { id: 'bronze', name: 'Bronze Pack',  cost: 100, count: 3, pool: [1,2,3] },
-    { id: 'silver', name: 'Silver Pack',  cost: 250, count: 3, pool: [2,3,4,5] },
-    { id: 'gold',   name: 'Gold Pack',    cost: 500, count: 3, pool: [4,5,6,7] },
-    { id: 'legend', name: 'Legend Pack',   cost: 1000, count: 3, pool: [7,8,9,10] },
+    { id: 'bronze', name: 'Bronze Pack',  cost: 100, count: 15,
+      pool: [1,2,3],
+      weights: { 1: 60, 2: 30, 3: 10 },
+      bonusWeights: { 1: 30, 2: 40, 3: 30 } },
+    { id: 'silver', name: 'Silver Pack',  cost: 300, count: 15,
+      pool: [2,3,4,5],
+      weights: { 2: 50, 3: 30, 4: 15, 5: 5 },
+      bonusWeights: { 2: 10, 3: 25, 4: 35, 5: 30 } },
+    { id: 'gold',   name: 'Gold Pack',    cost: 600, count: 15,
+      pool: [4,5,6,7],
+      weights: { 4: 45, 5: 30, 6: 18, 7: 7 },
+      bonusWeights: { 4: 10, 5: 20, 6: 35, 7: 35 } },
+    { id: 'legend', name: 'Legend Pack',   cost: 1200, count: 15,
+      pool: [7,8,9,10],
+      weights: { 7: 45, 8: 30, 9: 18, 10: 7 },
+      bonusWeights: { 7: 10, 8: 20, 9: 35, 10: 35 } },
 ];
 
+// Weighted random: pick a level from a weights map
+function weightedRandomLevel(weights) {
+    const entries = Object.entries(weights);
+    const total = entries.reduce((sum, e) => sum + e[1], 0);
+    let roll = Math.random() * total;
+    for (const [lvl, w] of entries) {
+        roll -= w;
+        if (roll <= 0) return parseInt(lvl);
+    }
+    return parseInt(entries[entries.length - 1][0]);
+}
+
 function randomCardsFromPack(pack) {
-    const eligible = ALL_CARDS.filter(c => pack.pool.includes(c.level));
     const picked = [];
-    for (let i = 0; i < pack.count; i++) {
+    // 14 regular cards with standard weights (lower levels more common)
+    for (let i = 0; i < pack.count - 1; i++) {
+        const lvl = weightedRandomLevel(pack.weights);
+        const eligible = ALL_CARDS.filter(c => c.level === lvl);
         picked.push(eligible[Math.floor(Math.random() * eligible.length)]);
     }
+    // 1 bonus card with better odds at the top-tier level
+    const bonusLvl = weightedRandomLevel(pack.bonusWeights);
+    const bonusEligible = ALL_CARDS.filter(c => c.level === bonusLvl);
+    picked.push(bonusEligible[Math.floor(Math.random() * bonusEligible.length)]);
     return picked;
 }
 

@@ -454,6 +454,7 @@ TT.UI = {
 
         var icons = { bronze: '🥉', silver: '🥈', gold: '🥇', legend: '💎' };
         var levelInfo = { bronze: 'Lv 1–3', silver: 'Lv 2–5', gold: 'Lv 4–7', legend: 'Lv 7–10' };
+        var bonusInfo = { bronze: '1 bonus slot: better Lv 3 odds', silver: '1 bonus slot: better Lv 5 odds', gold: '1 bonus slot: better Lv 7 odds', legend: '1 bonus slot: better Lv 10 odds' };
 
         for (var i = 0; i < packs.length; i++) {
             var p = packs[i];
@@ -465,7 +466,8 @@ TT.UI = {
                 '<div class="pack-icon">' + (icons[p.id] || '📦') + '</div>' +
                 '<div class="pack-name">' + p.name + '</div>' +
                 '<div class="pack-cost">🪙 ' + p.cost + '</div>' +
-                '<div class="pack-info">' + p.count + ' cards · ' + (levelInfo[p.id] || '') + '</div>';
+                '<div class="pack-info">' + p.count + ' cards · ' + (levelInfo[p.id] || '') + '</div>' +
+                '<div class="pack-bonus">' + (bonusInfo[p.id] || '') + '</div>';
 
             card.addEventListener('click', (function(packId) {
                 return function() { onBuy(packId); };

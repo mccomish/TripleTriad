@@ -1240,6 +1240,12 @@ body {
     font-size: 0.7rem;
     color: rgba(255,255,255,0.3);
 }
+.pack-card .pack-bonus {
+    font-size: 0.6rem;
+    color: #ffd700;
+    opacity: 0.6;
+    margin-top: 4px;
+}
 .pack-card.bronze { border-color: rgba(205,127,50,0.4); }
 .pack-card.bronze:hover { border-color: rgba(205,127,50,0.8); box-shadow: 0 0 20px rgba(205,127,50,0.2); }
 .pack-card.silver { border-color: rgba(192,192,192,0.4); }
@@ -1262,10 +1268,13 @@ body {
     flex-direction: column;
     align-items: center;
     gap: 20px;
-    padding: 40px 50px;
+    padding: 30px;
     background: linear-gradient(145deg, #1a1a3e, #0d0d2b);
     border: 2px solid rgba(255,215,0,0.5);
     border-radius: 12px;
+    max-width: 90vw;
+    max-height: 85vh;
+    overflow-y: auto;
 }
 .pack-result-box h2 {
     font-family: 'Cinzel', serif;
