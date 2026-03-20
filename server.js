@@ -781,4 +781,7 @@ db.init().then(() => {
     server.listen(PORT, () => {
         console.log(`Triple Triad server running on http://localhost:${PORT}`);
     });
+}).catch(err => {
+    console.error('Failed to initialize database:', err);
+    process.exit(1);
 });

@@ -10,6 +10,7 @@ window.TT = window.TT || {};
     var myStats     = null;
     var myCollection = null;
     var myCoins     = 0;
+    var myUserId    = null;
     var currentGameState = null;
     var isAiMatch   = false;
 
@@ -37,6 +38,7 @@ window.TT = window.TT || {};
 
     function enterLobby() {
         TT.Net.getMe().then(function (data) {
+            myUserId     = data.id;
             myUsername   = data.username;
             myStats      = data.stats;
             myCollection = data.collection;
@@ -106,6 +108,100 @@ window.TT = window.TT || {};
             myCollection = data.collection;
             TT.UI.renderCollection(myCollection, myCoins, onSellCard);
             TT.UI.updateCoins(myCoins);
+        });
+    }
+
+    /* ═══════════════════════════════════════════
+       AUCTION HOUSE / MARKET
+       ═══════════════════════════════════════════ */
+
+    var sellSelectedCardId = null;
+
+    function openMarket() {
+        TT.Net.getMe().then(function (data) {
+            myCoins = data.coins || 0;
+            myUserId = data.id;
+            myCollection = data.collection;
+            TT.UI.updateCoins(myCoins);
+            switchMarketTab('browse');
+            TT.UI.showScreen('screen-market');
+        });
+    }
+
+    function switchMarketTab(tab) {
+        // Update tab buttons
+        document.querySelectorAll('.market-tab').forEach(function (t) {
+            t.classList.toggle('active', t.dataset.tab === tab);
+        });
+        // Update panels
+        document.getElementById('market-browse').classList.toggle('active', tab === 'browse');
+        document.getElementById('market-mine').classList.toggle('active', tab === 'my-listings');
+        document.getElementById('market-sell').classList.toggle('active', tab === 'sell');
+
+        if (tab === 'browse') {
+            TT.Net.getListings().then(function (listings) {
+                TT.UI.renderMarketBrowse(listings, myUserId, onBuyListing);
+            });
+        } else if (tab === 'my-listings') {
+            TT.Net.getMyListings().then(function (listings) {
+                TT.UI.renderMyListings(listings, onCancelListing);
+            });
+        } else if (tab === 'sell') {
+            sellSelectedCardId = null;
+            document.getElementById('sell-form').classList.add('hidden');
+            TT.Net.getMe().then(function (data) {
+                myCollection = data.collection;
+                TT.UI.renderSellGrid(myCollection, onSellSelect);
+            });
+        }
+    }
+
+    function onSellSelect(cardId, card) {
+        sellSelectedCardId = cardId;
+        document.getElementById('sell-card-name').textContent = card.name;
+        document.getElementById('sell-price').value = '';
+        document.getElementById('sell-form').classList.remove('hidden');
+
+        // Highlight selected card
+        document.querySelectorAll('#sell-card-grid .card').forEach(function (c) {
+            c.classList.toggle('sell-selected', parseInt(c.dataset.cardId, 10) === cardId);
+        });
+    }
+
+    function onConfirmSell() {
+        if (!sellSelectedCardId) return;
+        var price = parseInt(document.getElementById('sell-price').value, 10);
+        if (!price || price < 1 || price > 99999) {
+            alert('Enter a price between 1 and 99,999');
+            return;
+        }
+        TT.Net.listCard(sellSelectedCardId, price).then(function (data) {
+            if (data.error) { alert(data.error); return; }
+            myCollection = data.collection;
+            sellSelectedCardId = null;
+            document.getElementById('sell-form').classList.add('hidden');
+            // Refresh the sell grid
+            TT.UI.renderSellGrid(myCollection, onSellSelect);
+        });
+    }
+
+    function onBuyListing(listingId) {
+        if (!confirm('Buy this card?')) return;
+        TT.Net.buyListing(listingId).then(function (data) {
+            if (data.error) { alert(data.error); return; }
+            myCoins = data.coins;
+            TT.UI.updateCoins(myCoins);
+            // Refresh browse
+            switchMarketTab('browse');
+        });
+    }
+
+    function onCancelListing(listingId) {
+        TT.Net.cancelListing(listingId).then(function (data) {
+            if (data.error) { alert(data.error); return; }
+            myCollection = data.collection;
+            // Refresh my listings
+            switchMarketTab('my-listings');
         });
     }
 
@@ -269,6 +365,7 @@ window.TT = window.TT || {};
         isAiMatch = false;
         // Refresh stats
         TT.Net.getMe().then(function (data) {
+            myUserId = data.id;
             myStats = data.stats;
             myCollection = data.collection;
             myCoins = data.coins || 0;
@@ -527,6 +624,7 @@ window.TT = window.TT || {};
 
         // Try auto-login from existing session
         TT.Net.getMe().then(function (data) {
+            myUserId     = data.id;
             myUsername   = data.username;
             myStats      = data.stats;
             myCollection = data.collection;
