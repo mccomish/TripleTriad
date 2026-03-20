@@ -147,10 +147,10 @@ function randomCardsFromPack(pack) {
     return picked;
 }
 
-// Card sell values based on level
+// Card sell values based on level — intentionally low so packs don't pay for themselves
 function getSellPrice(cardLevel) {
-    const prices = { 1: 10, 2: 20, 3: 35, 4: 55, 5: 80, 6: 120, 7: 175, 8: 250, 9: 400, 10: 600 };
-    return prices[cardLevel] || 10;
+    const prices = { 1: 2, 2: 4, 3: 7, 4: 12, 5: 20, 6: 35, 7: 55, 8: 90, 9: 200, 10: 500 };
+    return prices[cardLevel] || 2;
 }
 
 app.get('/api/packs', (req, res) => {
