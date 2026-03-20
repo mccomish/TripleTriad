@@ -51,6 +51,7 @@
             <button id="btn-play-ai" class="btn gold big">Play vs AI</button>
             <button id="btn-collection" class="btn outline big">My Collection</button>
             <button id="btn-shop" class="btn outline big">Shop</button>
+            <button id="btn-market" class="btn outline big">Auction House</button>
         </div>
 
         <!-- Right: Online Players -->
@@ -91,6 +92,49 @@
     </header>
     <div class="shop-layout">
         <div id="pack-list" class="pack-grid"></div>
+    </div>
+</div>
+
+<!-- ════════════ PACK RESULT SCREEN ════════════ -->
+
+<!-- ════════════ AUCTION HOUSE SCREEN ════════════ -->
+<div id="screen-market" class="screen">
+    <header class="top-bar">
+        <button id="btn-market-back" class="btn sm outline">&larr; Back</button>
+        <h2>Auction House</h2>
+        <span id="market-coins" class="coin-badge">🪙 0</span>
+    </header>
+
+    <div class="market-tabs">
+        <button class="market-tab active" data-tab="browse">Browse</button>
+        <button class="market-tab" data-tab="my-listings">My Listings</button>
+        <button class="market-tab" data-tab="sell">Sell a Card</button>
+    </div>
+
+    <!-- Browse listings -->
+    <div id="market-browse" class="market-panel active">
+        <div id="market-listings" class="market-grid"></div>
+        <p id="market-empty" class="market-empty-msg hidden">No listings right now.</p>
+    </div>
+
+    <!-- My listings -->
+    <div id="market-mine" class="market-panel">
+        <div id="my-listings-grid" class="market-grid"></div>
+        <p id="my-listings-empty" class="market-empty-msg hidden">You have no active listings.</p>
+    </div>
+
+    <!-- Sell a card -->
+    <div id="market-sell" class="market-panel">
+        <p class="sell-hint">Select a card and set a price.</p>
+        <div id="sell-card-grid" class="card-grid"></div>
+        <div id="sell-form" class="sell-form hidden">
+            <div class="sell-form-inner">
+                <span id="sell-card-name"></span>
+                <input id="sell-price" type="number" min="1" max="99999" placeholder="Price">
+                <button id="btn-confirm-sell" class="btn gold">List for Sale</button>
+                <button id="btn-cancel-sell" class="btn outline sm">Cancel</button>
+            </div>
+        </div>
     </div>
 </div>
 

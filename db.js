@@ -43,6 +43,17 @@ async function init() {
     await pool.query('CREATE INDEX IF NOT EXISTS idx_match_winner ON matches(winner_id)');
     await pool.query('CREATE INDEX IF NOT EXISTS idx_match_loser  ON matches(loser_id)');
 
+    await pool.query(`
+        CREATE TABLE IF NOT EXISTS listings (
+            id         SERIAL PRIMARY KEY,
+            seller_id  INTEGER NOT NULL REFERENCES users(id),
+            card_id    INTEGER NOT NULL,
+            price      INTEGER NOT NULL,
+            created_at TIMESTAMPTZ DEFAULT NOW()
+        )
+    `);
+    await pool.query('CREATE INDEX IF NOT EXISTS idx_listing_seller ON listings(seller_id)');
+
     // Migrate: add coins column if table already existed without it
     try { await pool.query('ALTER TABLE users ADD COLUMN coins INTEGER DEFAULT 500'); } catch (_) {}
 }
@@ -144,6 +155,49 @@ async function removeCardFromCollection(userId, cardId) {
     return true;
 }
 
+/* ── Auction House ───────────────────────────── */
+
+async function createListing(sellerId, cardId, price) {
+    const { rows } = await pool.query(
+        'INSERT INTO listings (seller_id, card_id, price) VALUES ($1, $2, $3) RETURNING id',
+        [sellerId, cardId, price]
+    );
+    return rows[0].id;
+}
+
+async function getListings() {
+    const { rows } = await pool.query(
+        `SELECT l.id, l.seller_id, l.card_id, l.price, l.created_at,
+                u.username AS seller_name
+         FROM listings l
+         JOIN users u ON u.id = l.seller_id
+         ORDER BY l.created_at DESC`
+    );
+    return rows;
+}
+
+async function getListing(listingId) {
+    const { rows } = await pool.query(
+        'SELECT * FROM listings WHERE id = $1',
+        [listingId]
+    );
+    return rows[0] || null;
+}
+
+async function deleteListing(listingId) {
+    await pool.query('DELETE FROM listings WHERE id = $1', [listingId]);
+}
+
+async function getMyListings(userId) {
+    const { rows } = await pool.query(
+        `SELECT l.id, l.card_id, l.price, l.created_at
+         FROM listings l WHERE l.seller_id = $1
+         ORDER BY l.created_at DESC`,
+        [userId]
+    );
+    return rows;
+}
+
 module.exports = {
     init,
     getUserByUsername,
@@ -158,4 +212,9 @@ module.exports = {
     spendCoins,
     addCardToCollection,
     removeCardFromCollection,
+    createListing,
+    getListings,
+    getListing,
+    deleteListing,
+    getMyListings,
 };

@@ -252,6 +252,19 @@ body {
     overflow: hidden;
     flex-shrink: 0;
 }
+.card-image {
+    position: absolute;
+    inset: 0;
+    background-size: cover;
+    background-position: center;
+    opacity: 0.5;
+    z-index: 0;
+    pointer-events: none;
+}
+.card > *:not(.card-image) {
+    position: relative;
+    z-index: 1;
+}
 .card-player, .card-mine {
     background: linear-gradient(145deg, #1a3a5c, #0d2240);
     border: 2px solid #4a9eff;
@@ -299,7 +312,26 @@ body {
 
 /* Card in grid (collection / deck-select) */
 .card-grid .card {
+    width: 120px;
+    height: 156px;
     cursor: pointer;
+}
+.card-grid .card .card-values {
+    width: 78px;
+    height: 78px;
+}
+.card-grid .card .card-name {
+    font-size: 0.55rem;
+    max-width: 110px;
+}
+.card-grid .card .card-level {
+    font-size: 0.6rem;
+}
+.card-grid .card .rarity-badge {
+    font-size: 0.45rem;
+}
+.card-grid .card .val {
+    font-size: 1.1rem;
 }
 .card-grid .card:hover {
     transform: scale(1.06);
@@ -639,6 +671,157 @@ body {
 .result-box h2.lose { color: #ef5350; }
 .result-box h2.draw { color: #b0bec5; }
 .result-box p { color: rgba(255,255,255,0.5); font-size: 0.9rem; }
+
+/* ═══════════════════════════════════════════════
+   AUCTION HOUSE / MARKET
+   ═══════════════════════════════════════════════ */
+
+#screen-market {
+    flex-direction: column;
+    align-items: center;
+}
+
+.market-tabs {
+    display: flex;
+    gap: 4px;
+    padding: 12px 20px 0;
+    width: 100%;
+    max-width: 900px;
+    justify-content: center;
+}
+
+.market-tab {
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-bottom: none;
+    color: rgba(255,255,255,0.5);
+    padding: 10px 24px;
+    border-radius: 8px 8px 0 0;
+    cursor: pointer;
+    font-family: 'Cinzel', serif;
+    font-size: 0.8rem;
+    transition: all 0.2s ease;
+}
+.market-tab:hover { color: rgba(255,255,255,0.8); }
+.market-tab.active {
+    background: rgba(255,215,0,0.1);
+    border-color: rgba(255,215,0,0.3);
+    color: #ffd700;
+}
+
+.market-panel {
+    display: none;
+    width: 100%;
+    max-width: 900px;
+    padding: 20px;
+    flex: 1;
+    overflow-y: auto;
+}
+.market-panel.active { display: block; }
+
+.market-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 16px;
+}
+
+.market-listing {
+    background: linear-gradient(145deg, #1a1a3e, #0d0d2b);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 10px;
+    padding: 12px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    transition: border-color 0.2s ease;
+}
+.market-listing:hover {
+    border-color: rgba(255,215,0,0.4);
+}
+
+.market-listing .card {
+    width: 100px;
+    height: 130px;
+}
+.market-listing .card-values {
+    width: 72px;
+    height: 72px;
+}
+
+.listing-info {
+    text-align: center;
+    width: 100%;
+}
+.listing-seller {
+    font-size: 0.7rem;
+    color: rgba(255,255,255,0.4);
+    margin-bottom: 4px;
+}
+.listing-price {
+    font-family: 'Cinzel', serif;
+    font-size: 0.9rem;
+    color: #ffd700;
+}
+.listing-btn {
+    width: 100%;
+    padding: 6px;
+    font-size: 0.75rem;
+    margin-top: 4px;
+}
+
+.market-empty-msg {
+    text-align: center;
+    color: rgba(255,255,255,0.4);
+    padding: 40px;
+    font-style: italic;
+}
+
+/* Sell form */
+.sell-hint {
+    text-align: center;
+    color: rgba(255,255,255,0.5);
+    margin-bottom: 16px;
+    font-size: 0.85rem;
+}
+.sell-form {
+    position: sticky;
+    bottom: 0;
+    background: linear-gradient(0deg, #0d0d2b 60%, transparent);
+    padding: 20px 0 10px;
+    display: flex;
+    justify-content: center;
+}
+.sell-form-inner {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: rgba(26,26,62,0.95);
+    border: 1px solid rgba(255,215,0,0.3);
+    border-radius: 10px;
+    padding: 12px 20px;
+}
+#sell-card-name {
+    font-family: 'Cinzel', serif;
+    color: #ffd700;
+    font-size: 0.85rem;
+}
+#sell-price {
+    width: 90px;
+    padding: 6px 10px;
+    background: rgba(255,255,255,0.08);
+    border: 1px solid rgba(255,255,255,0.2);
+    border-radius: 6px;
+    color: #fff;
+    font-size: 0.85rem;
+    text-align: center;
+}
+#sell-price::placeholder { color: rgba(255,255,255,0.3); }
+
+#market-sell .card-grid .card.sell-selected {
+    border-color: #ffd700;
+    box-shadow: 0 0 15px rgba(255,215,0,0.3);
+}
 
 /* ═══════════════════════════════════════════════
    RESPONSIVE

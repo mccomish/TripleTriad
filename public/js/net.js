@@ -77,5 +77,27 @@ TT.Net = {
 
     sellCard: function (cardId) {
         return this._post('/api/sell-card', { cardId: cardId });
+    },
+
+    /* ── Market / Auction House ──────────────── */
+
+    getListings: function () {
+        return fetch('/api/market').then(function (r) { return r.json(); });
+    },
+
+    getMyListings: function () {
+        return fetch('/api/market/mine').then(function (r) { return r.json(); });
+    },
+
+    listCard: function (cardId, price) {
+        return this._post('/api/market/list', { cardId: cardId, price: price });
+    },
+
+    buyListing: function (listingId) {
+        return this._post('/api/market/buy', { listingId: listingId });
+    },
+
+    cancelListing: function (listingId) {
+        return this._post('/api/market/cancel', { listingId: listingId });
     }
 };

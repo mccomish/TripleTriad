@@ -94,7 +94,7 @@ app.get('/api/me', async (req, res) => {
     const collection = await db.getCollection(req.session.userId);
     const stats      = await db.getStats(req.session.userId);
     const coins      = await db.getCoins(req.session.userId);
-    res.json({ username: req.session.username, collection, stats, coins });
+    res.json({ id: req.session.userId, username: req.session.username, collection, stats, coins });
 });
 
 /* ═════════════════════════════════════════════
@@ -160,6 +160,87 @@ app.post('/api/sell-card', async (req, res) => {
     const coins = await db.getCoins(req.session.userId);
     const collection = await db.getCollection(req.session.userId);
     res.json({ ok: true, price, coins, collection });
+});
+
+/* ═════════════════════════════════════════════
+   REST – Auction House
+   ═════════════════════════════════════════════ */
+
+// Get all listings
+app.get('/api/market', async (req, res) => {
+    const listings = await db.getListings();
+    res.json(listings);
+});
+
+// Get my listings
+app.get('/api/market/mine', async (req, res) => {
+    if (!req.session.userId) return res.status(401).json({ error: 'Not logged in' });
+    const listings = await db.getMyListings(req.session.userId);
+    res.json(listings);
+});
+
+// List a card for sale
+app.post('/api/market/list', async (req, res) => {
+    if (!req.session.userId) return res.status(401).json({ error: 'Not logged in' });
+    const { cardId, price } = req.body;
+    if (typeof cardId !== 'number' || !CARD_MAP[cardId])
+        return res.status(400).json({ error: 'Invalid card' });
+    if (typeof price !== 'number' || price < 1 || price > 99999 || !Number.isInteger(price))
+        return res.status(400).json({ error: 'Price must be between 1 and 99999' });
+
+    // Remove from collection
+    if (!(await db.removeCardFromCollection(req.session.userId, cardId)))
+        return res.status(400).json({ error: "You don't own that card" });
+
+    const listingId = await db.createListing(req.session.userId, cardId, price);
+    const collection = await db.getCollection(req.session.userId);
+    res.json({ ok: true, listingId, collection });
+});
+
+// Buy a listed card
+app.post('/api/market/buy', async (req, res) => {
+    if (!req.session.userId) return res.status(401).json({ error: 'Not logged in' });
+    const { listingId } = req.body;
+    if (typeof listingId !== 'number')
+        return res.status(400).json({ error: 'Invalid listing' });
+
+    const listing = await db.getListing(listingId);
+    if (!listing) return res.status(404).json({ error: 'Listing not found' });
+    if (listing.seller_id === req.session.userId)
+        return res.status(400).json({ error: "You can't buy your own card" });
+
+    if (!(await db.spendCoins(req.session.userId, listing.price)))
+        return res.status(400).json({ error: 'Not enough coins' });
+
+    // Give coins to seller
+    await db.addCoins(listing.seller_id, listing.price);
+    // Give card to buyer
+    await db.addCardToCollection(req.session.userId, listing.card_id);
+    // Remove listing
+    await db.deleteListing(listingId);
+
+    const coins = await db.getCoins(req.session.userId);
+    res.json({ ok: true, coins });
+});
+
+// Cancel your own listing
+app.post('/api/market/cancel', async (req, res) => {
+    if (!req.session.userId) return res.status(401).json({ error: 'Not logged in' });
+    const { listingId } = req.body;
+    if (typeof listingId !== 'number')
+        return res.status(400).json({ error: 'Invalid listing' });
+
+    const listing = await db.getListing(listingId);
+    if (!listing) return res.status(404).json({ error: 'Listing not found' });
+    if (listing.seller_id !== req.session.userId)
+        return res.status(403).json({ error: 'Not your listing' });
+
+    // Return card to collection
+    await db.addCardToCollection(req.session.userId, listing.card_id);
+    await db.deleteListing(listingId);
+
+    const collection = await db.getCollection(req.session.userId);
+    res.json({ ok: true, collection });
 });
 
 /* ═════════════════════════════════════════════════

@@ -281,6 +281,101 @@ window.TT = window.TT || {};
     }
 
     /* ═══════════════════════════════════════════
+       AUCTION HOUSE / MARKET
+       ═══════════════════════════════════════════ */
+
+    var myUserId = null;
+    var sellSelectedCardId = null;
+
+    function openMarket() {
+        TT.Net.getMe().then(function (data) {
+            myCoins = data.coins || 0;
+            myCollection = data.collection;
+            myUserId = data.id;
+            TT.UI.updateCoins(myCoins);
+            switchMarketTab('browse');
+            TT.UI.showScreen('screen-market');
+        });
+    }
+
+    function switchMarketTab(tab) {
+        // Update tab buttons
+        var tabs = document.querySelectorAll('.market-tab');
+        tabs.forEach(function (t) { t.classList.toggle('active', t.dataset.tab === tab); });
+
+        // Update panels
+        document.getElementById('market-browse').classList.toggle('active', tab === 'browse');
+        document.getElementById('market-mine').classList.toggle('active', tab === 'my-listings');
+        document.getElementById('market-sell').classList.toggle('active', tab === 'sell');
+
+        if (tab === 'browse') loadBrowse();
+        if (tab === 'my-listings') loadMyListings();
+        if (tab === 'sell') loadSellGrid();
+    }
+
+    function loadBrowse() {
+        TT.Net.getListings().then(function (listings) {
+            TT.UI.renderMarketBrowse(listings, myUserId, onBuyListing);
+        });
+    }
+
+    function loadMyListings() {
+        TT.Net.getMyListings().then(function (listings) {
+            TT.UI.renderMyListings(listings, onCancelListing);
+        });
+    }
+
+    function loadSellGrid() {
+        sellSelectedCardId = null;
+        document.getElementById('sell-form').classList.add('hidden');
+        TT.Net.getMe().then(function (data) {
+            myCollection = data.collection;
+            TT.UI.renderSellGrid(myCollection, onSelectSellCard);
+        });
+    }
+
+    function onSelectSellCard(cardId, card) {
+        sellSelectedCardId = cardId;
+        document.getElementById('sell-card-name').textContent = card.name;
+        document.getElementById('sell-price').value = '';
+        document.getElementById('sell-form').classList.remove('hidden');
+
+        // Highlight selected
+        var cards = document.querySelectorAll('#sell-card-grid .card');
+        cards.forEach(function (c) { c.classList.toggle('sell-selected', parseInt(c.dataset.cardId) === cardId); });
+    }
+
+    function onConfirmSell() {
+        if (!sellSelectedCardId) return;
+        var price = parseInt(document.getElementById('sell-price').value, 10);
+        if (!price || price < 1 || price > 99999) { alert('Set a price between 1 and 99,999'); return; }
+
+        TT.Net.listCard(sellSelectedCardId, price).then(function (data) {
+            if (data.error) { alert(data.error); return; }
+            myCollection = data.collection;
+            loadSellGrid();
+        });
+    }
+
+    function onBuyListing(listingId) {
+        if (!confirm('Buy this card?')) return;
+        TT.Net.buyListing(listingId).then(function (data) {
+            if (data.error) { alert(data.error); return; }
+            myCoins = data.coins;
+            TT.UI.updateCoins(myCoins);
+            loadBrowse();
+        });
+    }
+
+    function onCancelListing(listingId) {
+        TT.Net.cancelListing(listingId).then(function (data) {
+            if (data.error) { alert(data.error); return; }
+            myCollection = data.collection;
+            loadMyListings();
+        });
+    }
+
+    /* ═══════════════════════════════════════════
        SOCKET EVENTS
        ═══════════════════════════════════════════ */
 
@@ -347,6 +442,7 @@ window.TT = window.TT || {};
         document.getElementById('btn-collection').addEventListener('click', openCollection);
         document.getElementById('btn-play-ai').addEventListener('click', onPlayAI);
         document.getElementById('btn-shop').addEventListener('click', openShop);
+        document.getElementById('btn-market').addEventListener('click', openMarket);
 
         // Collection
         document.getElementById('btn-back-lobby').addEventListener('click', function () {
@@ -378,6 +474,30 @@ window.TT = window.TT || {};
         });
         document.getElementById('btn-pack-done').addEventListener('click', function () {
             openShop();
+        });
+
+        // Market / Auction House
+        document.getElementById('btn-market-back').addEventListener('click', function () {
+            TT.Net.getMe().then(function (data) {
+                myStats = data.stats;
+                myCollection = data.collection;
+                myCoins = data.coins || 0;
+                TT.UI.renderLobby(myUsername, myStats, myCoins);
+                TT.UI.showScreen('screen-lobby');
+            });
+        });
+        document.querySelectorAll('.market-tab').forEach(function (tab) {
+            tab.addEventListener('click', function () {
+                switchMarketTab(tab.dataset.tab);
+            });
+        });
+        document.getElementById('btn-confirm-sell').addEventListener('click', onConfirmSell);
+        document.getElementById('btn-cancel-sell').addEventListener('click', function () {
+            sellSelectedCardId = null;
+            document.getElementById('sell-form').classList.add('hidden');
+            document.querySelectorAll('#sell-card-grid .card').forEach(function (c) {
+                c.classList.remove('sell-selected');
+            });
         });
 
         // Deck select

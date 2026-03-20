@@ -8,6 +8,12 @@ TT.UI = {
 
     selectedHandIndex: null,
 
+    // Map of card ID → image filename (only cards with artwork)
+    CARD_IMAGES: {
+        1: 'moss.png',
+        2: 'stinger.png',
+    },
+
     /* ── Screen management ───────────────────── */
 
     showScreen: function (id) {
@@ -26,6 +32,15 @@ TT.UI = {
         var el = document.createElement('div');
         el.className = 'card ' + (cssClass || 'card-neutral') + ' ' + rarity.css;
         el.dataset.cardId = card.id;
+
+        // Card artwork (if available)
+        var imgFile = TT.UI.CARD_IMAGES[card.id];
+        if (imgFile) {
+            var img = document.createElement('div');
+            img.className = 'card-image';
+            img.style.backgroundImage = 'url(/images/cards/' + imgFile + ')';
+            el.appendChild(img);
+        }
 
         var lvl = document.createElement('div');
         lvl.className = 'card-level';
@@ -472,10 +487,142 @@ TT.UI = {
     },
 
     updateCoins: function (coins) {
-        var els = ['lobby-coins', 'shop-coins', 'coll-coins'];
+        var els = ['lobby-coins', 'shop-coins', 'coll-coins', 'market-coins'];
         for (var i = 0; i < els.length; i++) {
             var el = document.getElementById(els[i]);
             if (el) el.textContent = '🪙 ' + (coins || 0);
         }
+    },
+
+    /* ── Market / Auction House ─────────────── */
+
+    renderMarketBrowse: function (listings, myUserId, onBuy) {
+        var grid = document.getElementById('market-listings');
+        var empty = document.getElementById('market-empty');
+        grid.innerHTML = '';
+
+        if (!listings || listings.length === 0) {
+            empty.classList.remove('hidden');
+            return;
+        }
+        empty.classList.add('hidden');
+
+        for (var i = 0; i < listings.length; i++) {
+            var l = listings[i];
+            var card = TT.Cards[l.card_id];
+            if (!card) continue;
+
+            var wrapper = document.createElement('div');
+            wrapper.className = 'market-listing';
+
+            var cardEl = this.buildCard(card, 'card-neutral');
+            wrapper.appendChild(cardEl);
+
+            var info = document.createElement('div');
+            info.className = 'listing-info';
+            info.innerHTML =
+                '<div class="listing-seller">Seller: ' + this._escapeHtml(l.seller_name) + '</div>' +
+                '<div class="listing-price">🪙 ' + l.price + '</div>';
+            wrapper.appendChild(info);
+
+            if (l.seller_id !== myUserId) {
+                var btn = document.createElement('button');
+                btn.className = 'btn gold listing-btn';
+                btn.textContent = 'Buy';
+                btn.dataset.listingId = l.id;
+                btn.addEventListener('click', (function (id) {
+                    return function () { onBuy(id); };
+                })(l.id));
+                wrapper.appendChild(btn);
+            }
+
+            grid.appendChild(wrapper);
+        }
+    },
+
+    renderMyListings: function (listings, onCancel) {
+        var grid = document.getElementById('my-listings-grid');
+        var empty = document.getElementById('my-listings-empty');
+        grid.innerHTML = '';
+
+        if (!listings || listings.length === 0) {
+            empty.classList.remove('hidden');
+            return;
+        }
+        empty.classList.add('hidden');
+
+        for (var i = 0; i < listings.length; i++) {
+            var l = listings[i];
+            var card = TT.Cards[l.card_id];
+            if (!card) continue;
+
+            var wrapper = document.createElement('div');
+            wrapper.className = 'market-listing';
+
+            var cardEl = this.buildCard(card, 'card-neutral');
+            wrapper.appendChild(cardEl);
+
+            var info = document.createElement('div');
+            info.className = 'listing-info';
+            info.innerHTML = '<div class="listing-price">🪙 ' + l.price + '</div>';
+            wrapper.appendChild(info);
+
+            var btn = document.createElement('button');
+            btn.className = 'btn outline listing-btn';
+            btn.textContent = 'Cancel';
+            btn.dataset.listingId = l.id;
+            btn.addEventListener('click', (function (id) {
+                return function () { onCancel(id); };
+            })(l.id));
+            wrapper.appendChild(btn);
+
+            grid.appendChild(wrapper);
+        }
+    },
+
+    renderSellGrid: function (collection, onSelect) {
+        var grid = document.getElementById('sell-card-grid');
+        grid.innerHTML = '';
+
+        // Build unique card list with counts
+        var counts = {};
+        for (var i = 0; i < collection.length; i++) {
+            var id = collection[i];
+            counts[id] = (counts[id] || 0) + 1;
+        }
+
+        var sorted = Object.keys(counts).sort(function (a, b) {
+            var ca = TT.Cards[a], cb = TT.Cards[b];
+            return (cb ? cb.level : 0) - (ca ? ca.level : 0);
+        });
+
+        for (var j = 0; j < sorted.length; j++) {
+            var cardId = parseInt(sorted[j], 10);
+            var card = TT.Cards[cardId];
+            if (!card) continue;
+
+            var el = this.buildCard(card, 'card-neutral');
+            el.style.cursor = 'pointer';
+            el.dataset.cardId = cardId;
+
+            if (counts[cardId] > 1) {
+                var badge = document.createElement('span');
+                badge.className = 'dupe-count';
+                badge.textContent = 'x' + counts[cardId];
+                el.appendChild(badge);
+            }
+
+            el.addEventListener('click', (function (cid, c) {
+                return function () { onSelect(cid, c); };
+            })(cardId, card));
+
+            grid.appendChild(el);
+        }
+    },
+
+    _escapeHtml: function (str) {
+        var div = document.createElement('div');
+        div.appendChild(document.createTextNode(str));
+        return div.innerHTML;
     }
 };
