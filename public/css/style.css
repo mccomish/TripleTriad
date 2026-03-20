@@ -261,7 +261,7 @@ body {
     z-index: 0;
     pointer-events: none;
 }
-.card > *:not(.card-image):not(.card-values) {
+.card > *:not(.card-image):not(.card-values):not(.card-level):not(.rarity-badge):not(.card-name) {
     position: relative;
     z-index: 1;
 }
