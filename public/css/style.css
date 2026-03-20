@@ -261,7 +261,7 @@ body {
     z-index: 0;
     pointer-events: none;
 }
-.card > *:not(.card-image) {
+.card > *:not(.card-image):not(.card-values) {
     position: relative;
     z-index: 1;
 }
@@ -317,8 +317,9 @@ body {
     cursor: pointer;
 }
 .card-grid .card .card-values {
-    top: 16px;
-    left: 4px;
+    top: 6px;
+    right: 4px;
+    left: auto;
     grid-template-columns: 16px 16px 16px;
     grid-template-rows: 16px 16px 16px;
     width: 48px;
@@ -438,8 +439,8 @@ body {
 /* Card value diamond */
 .card-values {
     position: absolute;
-    top: 14px;
-    left: 2px;
+    top: 4px;
+    right: 2px;
     display: grid;
     grid-template-areas:
         ". top ."
@@ -743,8 +744,9 @@ body {
     height: 240px;
 }
 .modal-card-preview .card-values {
-    top: 18px;
-    left: 6px;
+    top: 8px;
+    right: 6px;
+    left: auto;
     grid-template-columns: 18px 18px 18px;
     grid-template-rows: 18px 18px 18px;
     width: 54px;
@@ -992,8 +994,11 @@ body {
     height: 130px;
 }
 .market-listing .card-values {
-    width: 72px;
-    height: 72px;
+    top: 4px;
+    right: 2px;
+    left: auto;
+    width: 42px;
+    height: 42px;
 }
 
 .listing-info {
@@ -1081,8 +1086,9 @@ body {
     .board-cell { width: 85px; height: 108px; }
     .card { width: 78px; height: 102px; }
     .card-values {
-        top: 10px;
-        left: 2px;
+        top: 4px;
+        right: 2px;
+        left: auto;
         grid-template-columns: 12px 12px 12px;
         grid-template-rows: 12px 12px 12px;
         width: 36px;
@@ -1104,8 +1110,9 @@ body {
     .board-cell { width: 28vw; height: 35vw; }
     .card { width: 26vw; height: 33vw; }
     .card-values {
-        top: 2vw;
-        left: 1vw;
+        top: 1vw;
+        right: 1vw;
+        left: auto;
         grid-template-columns: 3vw 3vw 3vw;
         grid-template-rows: 3vw 3vw 3vw;
         width: 9vw;
@@ -1127,8 +1134,9 @@ body {
     .pack-card { width: 46vw; padding: 16px 10px; }
     .card-grid .card { width: 105px; height: 140px; }
     .card-grid .card .card-values {
-        top: 10px;
-        left: 2px;
+        top: 4px;
+        right: 2px;
+        left: auto;
         grid-template-columns: 12px 12px 12px;
         grid-template-rows: 12px 12px 12px;
         width: 36px;
@@ -1138,8 +1146,9 @@ body {
     .deck-slots { gap: 4px; }
     .deck-slots .card { width: 56px; height: 72px; }
     .deck-slots .card .card-values {
-        top: 6px;
-        left: 1px;
+        top: 3px;
+        right: 1px;
+        left: auto;
         grid-template-columns: 10px 10px 10px;
         grid-template-rows: 10px 10px 10px;
         width: 30px;
