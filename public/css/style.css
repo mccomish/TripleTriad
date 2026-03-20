@@ -257,7 +257,7 @@ body {
     inset: 0;
     background-size: cover;
     background-position: center;
-    opacity: 0.5;
+    opacity: 0.7;
     z-index: 0;
     pointer-events: none;
 }
@@ -312,17 +312,20 @@ body {
 
 /* Card in grid (collection / deck-select) */
 .card-grid .card {
-    width: 120px;
-    height: 156px;
+    width: 150px;
+    height: 200px;
     cursor: pointer;
 }
 .card-grid .card .card-values {
-    width: 78px;
-    height: 78px;
+    top: 16px;
+    left: 4px;
+    grid-template-columns: 16px 16px 16px;
+    grid-template-rows: 16px 16px 16px;
+    width: 48px;
+    height: 48px;
 }
 .card-grid .card .card-name {
-    font-size: 0.55rem;
-    max-width: 110px;
+    font-size: 0.6rem;
 }
 .card-grid .card .card-level {
     font-size: 0.6rem;
@@ -331,7 +334,7 @@ body {
     font-size: 0.45rem;
 }
 .card-grid .card .val {
-    font-size: 1.1rem;
+    font-size: 1rem;
 }
 .card-grid .card:hover {
     transform: scale(1.06);
@@ -434,24 +437,29 @@ body {
 
 /* Card value diamond */
 .card-values {
+    position: absolute;
+    top: 14px;
+    left: 2px;
     display: grid;
     grid-template-areas:
         ". top ."
         "left . right"
         ". bottom .";
-    grid-template-columns: 1fr 1fr 1fr;
-    grid-template-rows: 1fr 1fr 1fr;
-    width: 68px;
-    height: 68px;
+    grid-template-columns: 14px 14px 14px;
+    grid-template-rows: 14px 14px 14px;
+    width: 42px;
+    height: 42px;
     align-items: center;
     justify-items: center;
+    z-index: 2;
 }
 .val {
     font-family: 'Cinzel', serif;
-    font-size: 1.05rem;
+    font-size: 0.85rem;
     font-weight: 700;
     color: #fff;
-    text-shadow: 1px 1px 3px rgba(0,0,0,0.9);
+    text-shadow: 1px 1px 3px rgba(0,0,0,0.95), 0 0 6px rgba(0,0,0,0.6);
+    line-height: 1;
 }
 .val-top    { grid-area: top; }
 .val-right  { grid-area: right; }
@@ -459,15 +467,21 @@ body {
 .val-left   { grid-area: left; }
 
 .card-name {
+    position: absolute;
+    bottom: 3px;
+    left: 0;
+    right: 0;
     font-size: 0.5rem;
     text-align: center;
-    color: rgba(255,255,255,0.7);
-    margin-top: 4px;
-    max-width: 92px;
+    color: rgba(255,255,255,0.85);
+    max-width: 100%;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
     letter-spacing: 0.5px;
+    padding: 2px 4px;
+    background: linear-gradient(transparent, rgba(0,0,0,0.6));
+    z-index: 2;
 }
 .card-level {
     position: absolute;
@@ -725,17 +739,22 @@ body {
     align-items: center;
 }
 .modal-card-preview .card {
-    width: 130px;
-    height: 169px;
+    width: 180px;
+    height: 240px;
 }
 .modal-card-preview .card-values {
-    width: 90px;
-    height: 90px;
+    top: 18px;
+    left: 6px;
+    grid-template-columns: 18px 18px 18px;
+    grid-template-rows: 18px 18px 18px;
+    width: 54px;
+    height: 54px;
 }
-.modal-card-preview .val { font-size: 1.1rem; }
-.modal-card-preview .card-name { font-size: 0.55rem; }
-.modal-card-preview .card-level { font-size: 0.6rem; }
+.modal-card-preview .val { font-size: 1.15rem; }
+.modal-card-preview .card-name { font-size: 0.65rem; }
+.modal-card-preview .card-level { font-size: 0.65rem; }
 .modal-card-preview .rarity-badge { font-size: 0.5rem; }
+.modal-card-preview .card-image { opacity: 0.85; }
 
 .modal-info {
     display: flex;
@@ -1061,8 +1080,15 @@ body {
     .hand { flex-direction: row; gap: 4px; }
     .board-cell { width: 85px; height: 108px; }
     .card { width: 78px; height: 102px; }
-    .card-values { width: 54px; height: 54px; }
-    .val { font-size: 0.85rem; }
+    .card-values {
+        top: 10px;
+        left: 2px;
+        grid-template-columns: 12px 12px 12px;
+        grid-template-rows: 12px 12px 12px;
+        width: 36px;
+        height: 36px;
+    }
+    .val { font-size: 0.75rem; }
     .card-name { font-size: 0.42rem; }
     .lobby-layout { flex-direction: column; padding: 20px; gap: 20px; }
     .btn.big { width: 180px; }
@@ -1077,8 +1103,15 @@ body {
     .logo { font-size: 1.8rem; letter-spacing: 2px; }
     .board-cell { width: 28vw; height: 35vw; }
     .card { width: 26vw; height: 33vw; }
-    .card-values { width: 18vw; height: 18vw; }
-    .val { font-size: 0.7rem; }
+    .card-values {
+        top: 2vw;
+        left: 1vw;
+        grid-template-columns: 3vw 3vw 3vw;
+        grid-template-rows: 3vw 3vw 3vw;
+        width: 9vw;
+        height: 9vw;
+    }
+    .val { font-size: 0.65rem; }
     .card-name { font-size: 0.38rem; }
     .card-level { font-size: 0.5rem; padding: 1px 4px; }
     .rarity-badge { font-size: 0.4rem; padding: 1px 4px; }
@@ -1092,11 +1125,27 @@ body {
     .btn.big { width: 150px; padding: 10px; }
     .pack-grid { gap: 12px; }
     .pack-card { width: 46vw; padding: 16px 10px; }
-    .card-grid .card { width: 70px; height: 90px; }
-    .card-grid .card .card-values { width: 48px; height: 48px; }
+    .card-grid .card { width: 105px; height: 140px; }
+    .card-grid .card .card-values {
+        top: 10px;
+        left: 2px;
+        grid-template-columns: 12px 12px 12px;
+        grid-template-rows: 12px 12px 12px;
+        width: 36px;
+        height: 36px;
+    }
+    .card-grid .card .val { font-size: 0.8rem; }
     .deck-slots { gap: 4px; }
     .deck-slots .card { width: 56px; height: 72px; }
-    .deck-slots .card .card-values { width: 40px; height: 40px; }
+    .deck-slots .card .card-values {
+        top: 6px;
+        left: 1px;
+        grid-template-columns: 10px 10px 10px;
+        grid-template-rows: 10px 10px 10px;
+        width: 30px;
+        height: 30px;
+    }
+    .deck-slots .card .val { font-size: 0.6rem; }
     .auth-box { padding: 20px; }
     .result-box { padding: 24px; }
     .result-box h2 { font-size: 1.6rem; }
